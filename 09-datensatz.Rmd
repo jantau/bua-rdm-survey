@@ -1,0 +1,55 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Datensatz
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+Hier können die ersten 1000 Zeilen der quantitativen Daten der FDM-Umfrage betrachtet und heruntergeladen werden. Die qualitativen Fragen und Antworten wurden entfernt, um keine Rückschlüsse auf einzelne Umfrageteilnehmende zuzulassen.
+
+Die Antworten aus der Umfrage wurden mit den Fragen und Antwortmöglichkeiten aus dem Codebook verbunden und in ein langes Format übertragen. D.h. eine Zeile entspricht einer Antwortobservation eines Fragebogens.^[Das entspricht 182 Zeilen pro Fragebogen]
+
+## Datensatz im langen Format
+```{r}
+data_quant <- data %>%
+  filter(question_type != "Eingabe") %>%
+  select(-fct_levels, value_decoded)
+
+dir.create("output", showWarnings = FALSE)
+write_csv(data_quant, "output/data_rdm_survey.csv")
+
+data_quant_h <- head(data_quant, 1000)
+```
+
+
+```{r}
+library(DT)
+DT::datatable(data_quant_h, 
+              rownames = FALSE,
+              extensions = "Buttons",
+              options = list(scrollX = TRUE,
+                             dom = 'Bfrtipl',
+                             buttons = c('csv'),
+                             lengthMenu = c(10, 200, 1000))) 
+
+#%>%
+ # formatStyle(0, target= 'row', lineHeight = "95%")
+```
+\
+\
+Der vollständige quantitative Datensatz kann [hier](https://github.com/quest-bih/bua-rdm-survey/tree/main/output) heruntergeladen werden. 
+
+
+```{r}
+# Data in wide format
+# data_quant_wide <- data %>%
+#   filter(question_type != "Eingabe") %>%
+#   select(data_id, question_id, value) %>%
+#   pivot_wider(names_from = question_id, values_from = value)
+```
+

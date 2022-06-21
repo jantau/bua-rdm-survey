@@ -7,8 +7,9 @@ rm(list = ls(all = TRUE))
 knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
-  warning = FALSE,
-  out.width = "100%"
+  warning = FALSE
+  #,
+  #out.width = "100%"
 )
 
 # Load libraries
