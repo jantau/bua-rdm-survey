@@ -18,7 +18,7 @@ bookdown::gitbook:
       facebook: false
       github: true
       twitter: true
-      linkedin: false
+      linkedin: true
       weibo: false
       instapaper: false
       vk: false
