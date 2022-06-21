@@ -80,6 +80,8 @@ fdm-lösungen-die-an-der-charité-fehlen
 bekanntheit-von-instrumenten-und-services
 satzung-der-charité-zur-sicherung-guter-wissenschaftlicher-praxis
 lom-und-open-data-lom
+datensatz
+datensatz-im-langen-format
 sandbox
 kontakt
 teamleitung
