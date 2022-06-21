@@ -1,0 +1,58 @@
+p.caption {
+  color: #777;
+  margin-top: 10px;
+}
+p code {
+  white-space: inherit;
+}
+pre {
+  word-break: normal;
+  word-wrap: normal;
+}
+pre code {
+  white-space: inherit;
+}
+
+/*-----Body Links-------*/
+
+.book .book-summary ul.summary li a, 
+.book .book-summary ul.summary li span {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 15px;
+  padding-right: 15px;
+  color: #324748;
+}
+
+.summary a:hover {
+  color: #B13273 !important;
+} 
+
+.book .book-summary ul.summary li.active>a { /*active TOC links*/
+  color: #22415C !important;
+  border-left: solid 4px;
+  border-color: #B13273;
+  padding-left: 11px !important;
+} 
+
+.updatemenu-button:focus {
+    outline-color: transparent;
+    outline-style:solid;
+    box-shadow: 0 0 0 4px #5a01a7;
+    transition: 0.7s;
+}
+
+.updatemenu-button:active {
+    fill: #ffbf00;
+}
+ 
+/* Change font-family
+.book.font-family-1 {
+  font-family: "Times New Roman", Times, serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Lora', arial, sans-serif;
+}
+*/
+

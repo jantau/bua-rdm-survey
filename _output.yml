@@ -1,0 +1,36 @@
+bookdown::gitbook:
+  css: style.css
+ # toc_depth: 2
+  config:
+    toc:
+      collapse: section
+      scroll_highlight: yes
+      before: |
+        <li><a href="./">Analyse der FDM-Umfrage</a></li>
+      after: |
+        <li><a href="https://www.bihealth.org/de/translation/innovationstreiber/quest-center/projekte/quality/concept-development" target="blank">BUA FDM</a></li>
+    edit: https://github.com/USERNAME/REPO/edit/BRANCH/%s
+    fontsettings:
+      theme: white
+      family: sans
+      size: 1
+    sharing:
+      facebook: false
+      github: true
+      twitter: false
+      linkedin: false
+      weibo: false
+      instapaper: false
+      vk: false
+      whatsapp: false
+      all: ['facebook', 'twitter', 'linkedin', 'weibo', 'instapaper']
+    download: ["pdf"] # ["pdf", "epub"]
+  includes: 
+    after_body: _footer.html
+bookdown::pdf_book:
+  includes:
+    in_header: preamble.tex
+  latex_engine: xelatex
+  citation_package: natbib
+  keep_tex: yes
+bookdown::epub_book: default

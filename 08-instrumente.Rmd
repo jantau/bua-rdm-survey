@@ -1,0 +1,91 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+# Bekanntheit von Instrumenten und Services
+
+## Satzung der Charité zur Sicherung Guter Wissenschaftlicher Praxis
+
+```{r}
+
+gwp <- data %>%
+  filter(str_detect(question_id, "^REG_2$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  select(data_id, value_decoded) %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(perc = n / nn)
+```
+
+
+22% (100 von 447) sind die Vorgaben zu Forschungsdaten aus der Satzung der Charité zur Sicherung Guter Wissenschaftlicher Praxis nicht bekannt.
+
+## LOM und Open Data LOM
+
+Die Leistungsorientierte Mittelvergabe (LOM) ist 70,7% (328 von 464) der Umfrageteilnehmenden bekannt. Die Open Data LOM ist hingegen lediglich 26,1% (121 von 464) der Befragten bekannt.
+
+```{r intsrumente-1, fig.cap="LOM und Open Data LOM"}
+lom <- data %>%
+  filter(str_detect(question_id, "^LOM($|1)")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt"))
+
+test <- lom %>%
+  filter(question_id == "LOM") %>%
+  select(data_id, value_decoded) %>%
+  # pivot_wider(values_from = value_decoded) %>%
+  group_by(label = value_decoded) %>%
+  count() %>%
+  #  drop_na(LOM) %>%
+  ungroup() %>%
+  mutate(value = n / sum(n)) %>%
+  mutate(label = case_when(
+    label == "Ja" ~ "LOM bekannt",
+    TRUE ~ "LOM unbekannt"
+  )) %>%
+  mutate(parent = NA) %>%
+  mutate(label = factor(label, levels = c("LOM bekannt", "LOM unbekannt"))) %>%
+  complete(label, fill = list(n = 0, value = 0, parent = NA))
+
+
+test2 <- lom %>%
+  filter(question_id == "LOM1") %>%
+  select(data_id, value_decoded) %>%
+  group_by(label = value_decoded) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(value = n / sum(test$n)) %>%
+  mutate(label = case_when(
+    label == "Ja" ~ "Open Data\nLOM bekannt",
+    TRUE ~ "Open Data\nLOM unbekannt"
+  )) %>%
+  mutate(parent = "LOM bekannt")
+
+test3 <- bind_rows(test, test2) %>%
+  mutate(nn = n[label == "LOM bekannt"] + n[label == "LOM unbekannt"])
+
+
+test3 %>%
+  plot_ly(
+    parents = ~parent,
+    labels = ~label,
+    values = ~value,
+    type = "sunburst",
+    branchvalues = "total",
+    text = ~ paste0(round(value * 100, 1), "%\n(", n, ")"),
+    sort = FALSE,
+    # colors = col_2_cat,
+    # rotation = 198,
+    textinfo = "label+text",
+    insidetextorientation = "horizontal"
+  ) %>%
+  layout(colorway = ~ col_lik[c(5, 1)]) %>%
+  layout_title(text = "Bekanntheit von LOM und Open Data LOM") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```

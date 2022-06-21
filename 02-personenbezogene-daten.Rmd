@@ -1,0 +1,218 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Arbeit mit personenbezogenen Daten
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+```{r pers-1, fig.cap="Personenbegzogene Daten", out.width= "350px", out.height="300px", out.extra='style="float:right; padding:10px"'}
+ird <- data %>%
+  filter(str_detect(question_id, "^IRD$")) %>%
+  filter(value %in% c("0", "1", "2")) %>%
+  group_by(value_decoded) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(
+    nn = sum(n),
+    perc = n / sum(n)
+  ) %>%
+  arrange(-perc)
+
+ird_plot <- ird %>%
+  plot_ly(
+    labels = ~value_decoded,
+    values = ~n,
+    textposition = "auto",
+    texttemplate = ~ str_glue("{value_decoded}
+    {round(perc*100, 1)}% ({n})"),
+    showlegend = FALSE,
+    marker = list(
+      colors = col_lik[c(5, 1, 3)],
+      line = list(col = "#FFFFFF", width = 1)
+    ),
+    type = "pie"
+  ) %>%
+  layout_title(
+    text = "Arbeiten Sie mit\npersonenbezogenen Daten?",
+    margin = list(t = 50)
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+
+# Save static plotly image
+library(reticulate)
+save_image(ird_plot, file = "ird_plot.png", height = 300, width = 400, scale = 4)
+```
+
+```{r out.width= "50%", out.height="50%", out.extra='style="float:right; padding:5px"'}
+knitr::include_graphics("ird_plot.png")
+
+# ![](ird_plot.png)
+```
+An der Charité wird deutlich stärker als an anderen BUA-Einrichtungen mit personenbezogenen Daten gearbeitet.
+
+Auf die Frage "Arbeiten Sie mit personenbezogenen Daten" antworteten 67,9% (316 von 465) der Befragten, dass sie mit personenbezogenen Daten arbeiten würden. 30,3% (141 von 465) der Befragten gaben hingegen an, nicht mit personenbezogenen Daten zu arbeiten.
+
+## Beruflicher Status
+
+Wird die Frage nach der Arbeit mit personenbezogenen Daten nach dem beruflichen Status der Befragten gruppiert, wird deutlich, dass Professor\*innen am häufigsten mit personenbezogenen Daten (82% oder 47 von 57) arbeiten. Wissenschaftliche Mitarbeiter\*innen arbeiten durchschnittlich häufig (70% oder 187 von 268) mit personenbezogenen Daten. Doktorandinnen arbeiten etwas seltener (61% oder 57 von 93) mit personenbezogenen Daten.
+
+```{r pers-2, fig.cap="Personenbezogene Daten und beruflicher Status"}
+
+pers_sta <- data %>%
+  filter(str_detect(question_id, "^STA$|^IRD$")) %>%
+  select(data_id, question_id, value) %>%
+  pivot_wider(names_from = question_id, values_from = value) %>%
+  group_by(STA, IRD) %>%
+  count() %>%
+  filter(str_detect(IRD, "(-998|-999)", negate = TRUE)) %>%
+  group_by(IRD) %>%
+  group_modify(~ .x %>% adorn_totals("row", name = "0")) %>%
+  bind_rows() %>%
+  ungroup() %>%
+  mutate(nn = sum(n) / 2) %>%
+  group_by(STA) %>%
+  mutate(perc = n / sum(n)) %>%
+  mutate(n_group = sum(n)) %>%
+  ungroup() %>%
+  mutate(STA = factor(STA,
+    levels = as.character(0:6),
+    labels =
+      str_wrap(c("Alle", "Professor*in", "Doktorand*in", "Wissenschaftliche*r Mitarbeiter*in", "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)", "Technische*r Mitarbeiter*in", "Andere"), 30)
+  )) %>%
+  mutate(STA = paste0(STA, "\nn=", n_group)) %>%
+  mutate(STA = fct_reorder(STA, perc, first, .desc = TRUE)) %>%
+  mutate(STA = fct_relevel(STA, paste0("Alle\nn=", first(nn)), after = 6)) %>%
+  mutate(IRD = factor(IRD, levels = c("1", "0", "2"), labels = c("Ja", "Nein", "Ich weiß\nnicht")))
+
+
+test <- pers_sta %>%
+  ungroup() %>%
+  group_by(IRD) %>%
+  group_modify(~ .x %>% adorn_totals("row")) %>%
+  bind_rows()
+
+
+pers_sta %>%
+  plot_ly(
+    x = ~perc,
+    y = ~STA,
+    color = ~IRD,
+    colors = col_lik[c(5, 1, 3)], # col_cat[1:3],
+    hoverinfo = "text",
+    hovertext = ~ str_glue("<b>{STA}—{IRD}</b>
+    {n} ({round(perc*100, 1)}%)")
+  ) %>%
+  add_bars(
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11)
+  ) %>%
+  layout_bar_flip(
+    barmode = "stack",
+    legend_title = "Arbeiten Sie mit personenbez. Daten?"
+  ) %>%
+  layout_title(text = "Beruflicher Status\nund Arbeit mit personenbezogenen Daten") %>%
+  layout(
+    shapes = list(
+      type = "line",
+      x0 = -0.05,
+      x1 = 1,
+      xref = "paper",
+      y0 = 5.5,
+      y1 = 5.5,
+      line = list(color = "black", dash = "dot")
+    )
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+## Teilen von Forschungsdaten {#teilen-forschungsdaten}
+
+Die Häufigkeit, mit der Befragte mit personenbezogenen Daten arbeiten, spiegelt sich in spezifischen FDM-Praktiken wider. Forschende, die mit personenbezogenen Daten arbeiten, teilen deutlich seltener Forschungsdaten (17% oder 55 von 316) mit allen Forschenden und/oder der Öffentlichkeit als Forschende, die nicht mit personenbezogenen Daten arbeiten (29% oder 41 von 141). 
+
+```{r pers-3, fig.cap="Personenbezogene Daten und Teilen von Forschungsdaten"}
+
+teilen <- data %>%
+  filter(str_detect(question_id, "^DSH_[1-5]|^IRD$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  select(data_id, question_id, value) %>%
+  pivot_wider(names_from = question_id, values_from = c(value)) %>%
+  pivot_longer(cols = starts_with("DSH")) %>%
+  drop_na(IRD) %>%
+  group_by(name, IRD) %>%
+  summarise(n = sum(as.numeric(value)), nn = n()) %>%
+  group_by(name) %>%
+  group_modify(~ .x %>% adorn_totals("row", name = "Alle")) %>%
+  ungroup() %>%
+  mutate(perc = n / nn) %>%
+  mutate(name = factor(name, levels = c("DSH_1", "DSH_2", "DSH_3", "DSH_4", "DSH_5"), labels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/\noder der Öffentlichkeit", "Niemandem")))
+
+teilen %>%
+  plot_ly(
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11)
+  ) %>%
+  add_trace(
+    x = ~ perc[teilen$IRD == "1"],
+    y = ~ name[teilen$IRD == "1"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[teilen$IRD == "1"] * 100),
+      n = n[teilen$IRD == "1"],
+      nn = nn[teilen$IRD == "1"]
+    ),
+    name = ~ paste0("Ja (n=", nn[teilen$IRD == "1"], ")"),
+    marker = list(color = col_lik[5]),
+    type = "bar"
+  ) %>%
+  add_trace(
+    x = ~ perc[teilen$IRD == "0"],
+    y = ~ name[teilen$IRD == "0"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[teilen$IRD == "0"] * 100),
+      n = n[teilen$IRD == "0"],
+      nn = nn[teilen$IRD == "0"]
+    ),
+    name = ~ paste0("Nein (n=", nn[teilen$IRD == "0"], ")"),
+    marker = list(color = col_lik[1]),
+    type = "bar"
+  ) %>%
+  # add_trace(
+  #   x = ~ perc[teilen$IRD == "2"],
+  #   y = ~ name[teilen$IRD == "2"],
+  #   text = ~ paste0(round(perc[teilen$IRD == "2"] * 100, 0), "%"),
+  #   name = ~ paste0("Ich weiß nicht (n=", nn[teilen$IRD == "2"], ")"),
+  #   marker = list(color = col_cat[3]),
+  #   type = "bar",
+  #   visible = "legendonly"
+  # ) %>%
+  add_trace(
+    x = ~ perc[teilen$IRD == "Alle"],
+    y = ~ name[teilen$IRD == "Alle"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[teilen$IRD == "Alle"] * 100),
+      n = n[teilen$IRD == "Alle"],
+      nn = nn[teilen$IRD == "Alle"]
+    ),
+    name = ~ paste0("Alle (n=", nn[teilen$IRD == "Alle"], ")"),
+    marker = list(color = col_lik[3]),
+    type = "bar",
+    visible = "legendonly"
+  ) %>%
+  layout_bar_flip(legend_title = "Arbeiten Sie mit personenbez. Daten?", autorange = "reversed") %>%
+  layout_title(text = "Teilen von Forschungsdaten\nund Arbeit mit personenbezogenen Daten") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
