@@ -9,7 +9,7 @@ bookdown::gitbook:
         <li><a href="./">Analyse der FDM-Umfrage</a></li>
       after: |
         <li><a href="https://www.bihealth.org/de/translation/innovationstreiber/quest-center/projekte/quality/concept-development" target="blank">BUA FDM</a></li>
-    edit: https://github.com/USERNAME/REPO/edit/BRANCH/%s
+    edit: https://github.com/jantau/bua-rdm-survey/edit/development/%s
     fontsettings:
       theme: white
       family: sans
@@ -17,14 +17,14 @@ bookdown::gitbook:
     sharing:
       facebook: false
       github: true
-      twitter: false
+      twitter: true
       linkedin: false
       weibo: false
       instapaper: false
       vk: false
       whatsapp: false
-      all: ['facebook', 'twitter', 'linkedin', 'weibo', 'instapaper']
-    download: ["pdf"] # ["pdf", "epub"]
+      all: ['twitter', 'linkedin']
+    #download: ["pdf"] # ["pdf", "epub"]
   includes: 
     after_body: _footer.html
 bookdown::pdf_book:
