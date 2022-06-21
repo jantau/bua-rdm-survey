@@ -1,0 +1,450 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Unterstützungsbedarfe
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+## Welche Werkzeuge fehlen?
+
+Als Antwort auf die Frage "Für welche Aufgaben des Forschungsdatenmanagements fehlen Ihnen geeignete technische Werkzeuge?" gaben 47% (221 von 466) der Umfrageteilnehmenden an, dass ihnen Werkzeugen zur Erstellung von Datenmanagementplänen fehlen würden. 
+
+Auffällig bei den Antworten auf diese Frage ist, dass die Verteilung der Antworten sehr breit ist und viele Antwortmöglichkeiten ähnlich häufig ausgewählt wurden. 
+
+Am wenigsten Werkzeugen fehlten den Befragten bei der Publikation (9,9% oder 46 von 466). Lediglich 12,4% der Befragten (58 von 466) gaben ans, dass ihnen keine keine technischen Werkzeuge fehlen würden.
+
+
+```{r bedarfe-1, fig.cap="Technische Werkzeuge", out.height="550px"}
+tools <- data %>%
+  filter(str_detect(question_id, "^TOOL_.($|[0-6]$)")) %>%
+  filter(value != "-998") %>%
+  select(data_id, fct_levels, value) %>%
+  group_by(fct_levels, value) %>%
+  count() %>%
+  group_by(fct_levels) %>%
+  mutate(nn = sum(n)) %>%
+  ungroup() %>%
+  mutate(perc = n / nn) %>%
+  mutate(fct_levels = str_trim(fct_levels)) %>%
+  mutate(fct_levels = case_when(
+    fct_levels %in% c("Erstellung von Datenmanagementplänen", "Datenaustausch zwischen verschiedenen Systemen", "Mir fehlen keine technischen Werkzeuge.") ~ paste0("<b>", fct_levels, "</b>"),
+    TRUE ~ fct_levels
+  )) %>%
+  # mutate(fct_levels = str_wrap(fct_levels, 35)) %>%
+  mutate(fct_levels = fct_reorder(fct_levels, perc, first, .desc = TRUE)) %>%
+  mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein")))
+
+tools %>%
+  plot_ly(
+    x = ~perc,
+    y = ~fct_levels,
+    color = ~value,
+    colors = col_lik[c(5, 1)],
+    hoverinfo = "text",
+    hovertext = ~ str_glue(
+      "<b>{fct_levels}—{value}</b>
+    {n} ({round(perc*100, 1)}%)"
+    )
+  ) %>%
+  add_bars(
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11)
+  ) %>%
+  layout_bar_flip(barmode = "stack") %>%
+  layout_title(
+    margin = list(t = 80),
+    text = "Für welche Aufgaben des Forschungsdatenmanagements\nfehlen Ihnen geeignete technische Werkzeuge?"
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+
+```{r wordcloud-2, fig.cap="Technische Werkzeuge"}
+# Word Cloud
+tools <- data %>%
+  filter(str_detect(question_id, "^TOOL_.($|[0-6]$)")) %>%
+  filter(value != "-998") %>%
+  select(data_id, fct_levels, value_decoded) %>%
+  drop_na() %>%
+  group_by(fct_levels, value_decoded) %>%
+  count() %>%
+  # mutate(value_decoded = str_wrap(value_decoded, 30)) %>%
+  mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40)))
+
+set.seed(44)
+ggplot(tools, aes(label = value_decoded, size = n, color = n)) +
+  geom_text_wordcloud_area(eccentricity = 1) +
+  # geom_text_wordcloud() +
+  # scale_size_area(max_size = 10) +
+  scale_radius(range = c(1, 8), limits = c(0, NA)) +
+  theme_minimal() +
+  scale_color_gradient(low = col_lik[1], high = col_lik[5]) +
+  ggtitle("<b>Für welche Aufgaben des Forschungsdatenmanagements<br>fehlen Ihnen geeignete technische Werkzeuge?</b>") +
+  theme(
+    plot.title = element_markdown(family = "Arial", size = 10.5, hjust = 0.5),
+    plot.background = element_rect(fill = "#F2F2F2", linetype = 0),
+    panel.border = element_blank(),
+    plot.margin = margin(0.4, 0, 0, 0, "cm")
+  )
+```
+
+## Anzahl fehlende technische Werkzeuge
+
+Für die nächste Analyse wurde die Anzahl der zustimmenden Antworten auf die Frage mit mehrfacher Auswahlmöglichkeit "Für welche Aufgaben des Forschungsdatenmanagements fehlen Ihnen geeignete technische Werkzeuge?" für jeden Umfrageteilnehmenden summiert.
+
+Über ein Drittel der Umfrageteilnehmenden (35,8% oder 167 von 466) gaben, dass ihnen fünf oder mehr der vorgeschlagenen technischen Werkzeuge für die Aufgaben des Forschungsdatenmanagements fehlen würden. 16,7% (78 von 466) der Umfrageteilnehmenden gaben an, dass ihnen keine technischen Werkzeugen fehlen würden.^[Diese Zahl ist größer als die Anzahl derjenigen, die der Antwortmöglichkeit "Mir fehlen keine technischen Werkzeuge" zugestimmt haben, was daran liegt, dass 4,3% (20 von 466) der Umfrageteilnehmeden keiner Antwortmöglichkeit zugestimmt haben. Sowohl Umfrageteilnehmende, die keine Antwortmöglichkeit ausgewählt haben, als auch diejenigen, die der Antwortmöglichkeit "Mir fehlen keine technischen Werkzeuge" zugestimmt haben, wurden als Umfrageteilnehmenden ohne fehlende technische Werkzeuge gezählt.]
+
+
+```{r bedarfe-5, fig.cap="Technische Werkzeuge"}
+tools_n <- data %>%
+  filter(str_detect(question_id, "^TOOL_.($|[0-57]$)")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, question_id, fct_levels, value) %>%
+  mutate(
+    value = case_when(
+      question_id == "TOOL_17" ~ "1",
+      TRUE ~ value
+    ),
+    fct_levels = case_when(
+      question_id == "TOOL_17" ~ "Sonstiges, und zwar",
+      TRUE ~ fct_levels
+    )
+  ) %>%
+  mutate(nn = n_distinct(data_id)) %>%
+  group_by(data_id, nn) %>%
+  summarise(value = sum(as.numeric(value))) %>%
+  ungroup() %>%
+  mutate(value = fct_collapse(as.character(value),
+    "Keine" = "0",
+    "1" = "1",
+    "2" = "2",
+    "3" = "3",
+    "4" = "4",
+    "5 oder mehr" = as.character(5:15)
+  )) %>%
+  group_by(value, nn) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(value = factor(value, levels = c("Keine", "1", "2", "3", "4", "5 oder mehr"))) %>%
+  arrange(value) %>%
+  mutate(perc = n / nn)
+
+col <- c(col_cat, " #a675d7")
+
+tools_n %>%
+  plot_ly(
+    labels = ~value,
+    values = ~n,
+    textposition = "inside",
+    texttemplate = ~ str_glue("{value}
+                            {round(perc*100, 1)}% ({n})"),
+    insidetextorientation = "horizontal",
+    sort = FALSE,
+    automargin = TRUE,
+    showlegend = FALSE,
+    direction = "clockwise",
+    pull = c(0, 0, 0, 0, 0, 0.1),
+    marker = list(
+      colors = rev(col_lik_6),
+      line = list(col = "#FFFFFF", width = 1)
+    ),
+    type = "pie"
+  ) %>%
+  layout_title(text = "Wieviele technische Werkzeuge fehlen den Umfrageteilnehmenden?") %>%
+  layout_caption(text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
+    nn = max(nn)
+  )) %>%
+  layout_mode_bar() %>%
+  layout(uniformtext = list(minsize = 11, mode = "hide"))
+```
+
+
+## Was wäre der größter Anreiz, um stärker in FDM zu investieren?
+
+Die Frage "Was wäre für Sie der größte Anreiz, stärker in das Forschungsdatenmanagement zu investieren?" verlangte eine Einfach-Auswahl. Das heißt, die Umfrageteilnehmenden mussten sich für eine einzelne Antwort entscheiden und damit eine Auswahlmöglichkeit eindeutig priorisieren.  
+
+41% (175 von 429) derjenigen, die diese Frage beantworten, gaben an, dass zusätzliche Personalressourcen für FDM-Aufagen für sie den größten Anreiz liefern würden, stärker in das Forschungsdatenmanagement zu investieren. 
+
+Umfrageteilnehmende mit und ohne Teamleitung wählten diese Antwortmöglichkeit unterschiedlich häufig aus. Für mehr als die Hälfte der Befragten mit Teamleitung (54% oder 155 von 429) bot diese Antwortmöglichkeit den größten Anreiz stärker ins Forschungsdatenmanagement zu investieren. Von den Befragten ohne Teamleitung gaben etwa ein Drittel (34% oder 92 von 274) an, dass Personalressourcen der stärkste Anreit wären.
+
+
+
+```{r bedarfe-2, fig.cap="Größter Anreiz"}
+
+anreize <- data %>%
+  filter(str_detect(question_id, "^ICT_1$|LEAD")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, question_id, value_decoded) %>%
+  pivot_wider(names_from = question_id, values_from = c(value_decoded)) %>%
+  drop_na(ICT_1) %>%
+  # Summarise
+  group_by(LEAD, ICT_1) %>%
+  count() %>%
+  # Create totals
+  group_by(ICT_1) %>%
+  group_modify(~ .x %>% adorn_totals("row", name = "Alle")) %>%
+  group_by(LEAD) %>%
+  # N per group
+  mutate(nn = sum(n)) %>%
+  ungroup() %>%
+  # Perc
+  mutate(perc = n / nn) %>%
+  # Data preparation for plotting
+  mutate(ICT_1 = str_wrap(ICT_1, 50)) %>%
+  mutate(ICT_1 = fct_reorder(ICT_1, n, first, .desc = TRUE))
+
+# Plotly
+anreize %>%
+  plot_ly(
+    textfont = list(color = "white", size = 11),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0
+  ) %>%
+  add_trace(
+    x = ~ perc[anreize$LEAD == "Alle"],
+    y = ~ ICT_1[anreize$LEAD == "Alle"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[anreize$LEAD == "Alle"] * 100),
+      n = n[anreize$LEAD == "Alle"],
+      nn = nn[anreize$LEAD == "Alle"]
+    ),
+    name = ~ glue::glue("Alle\n(n={n})", n = nn[anreize$LEAD == "Alle"]),
+    marker = list(color = col_lik[3]),
+    type = "bar"
+  ) %>%
+  add_trace(
+    x = ~ perc[anreize$LEAD == "Ja"],
+    y = ~ ICT_1[anreize$LEAD == "Ja"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[anreize$LEAD == "Ja"] * 100),
+      n = n[anreize$LEAD == "Ja"],
+      nn = nn[anreize$LEAD == "Ja"]
+    ),
+    name = ~ glue::glue("Ja\n(n={n})", n = nn[anreize$LEAD == "Ja"]),
+    marker = list(color = col_lik[5]),
+    type = "bar",
+    visible = "legendonly"
+  ) %>%
+  add_trace(
+    x = ~ perc[anreize$LEAD == "Nein"],
+    y = ~ ICT_1[anreize$LEAD == "Nein"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[anreize$LEAD == "Nein"] * 100),
+      n = n[anreize$LEAD == "Nein"],
+      nn = nn[anreize$LEAD == "Nein"]
+    ),
+    name = ~ glue::glue("Nein\n(n={n})", n = nn[anreize$LEAD == "Nein"]),
+    marker = list(color = col_lik[1]),
+    type = "bar",
+    visible = "legendonly"
+  ) %>%
+  layout_bar_flip(
+    autorange = "reversed",
+    range = c(-0.01, 0.55),
+    uniformtext = list(minsize = 8, mode = "hide"),
+    legend_title = "Leiten Sie ein Team?"
+  ) %>%
+  layout_title(
+    margin = list(t = 80),
+    text = "Was wäre für Sie der größte Anreiz,\nstärker in das Forschungsdatenmanagement zu investieren?"
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+Die Frage "Was wäre für Sie der größte Anreiz, stärker in das Forschungsdatenmanagement zu investieren?" (Einfach-Auswahl) wurde sehr unterschiedliche von Umfrageteilnehmenden mit und ohne Teamleitung beantwortet. Die Unterschiede in den Antworten dieser beiden Gruppen werden in der nächsten Analyse betont. Es wird jeweils der Unterschied zum Mittelwert abgebildet. 
+
+Umfrageteilnehmende mit Teamleitung geben so 31% häufiger als der Durchschnitt an, dass Personalressourcen für FDM-Aufgaben für sie der größte Anreiz wäre, stärker in das FDM zu investieren. Umfrageteilnehmende ohne Teamleitung wählten hingegen 18% seltener als der Durchschnitt Personalressourcen als den größten Anreiz aus. 
+
+Auch bei den anderen Antwortmöglichkeiten wurde ein deutlicher Unterschied zwischen den beiden Gruppen deutlich. Einzig bei der Antwortmöglichkeit "Förderung von FDM-Projekten in der Charité" zeigte sich kein deutlicher Unterschiedlich in der Bedeutung bei Befragten mit und ohne Teamleitung.
+
+Diese Analyse ist der Einschränkung unterworfen, dass durch die vorgegebene Einfach-Auswahl der Frage die Befragten eine eindeutige Präferenz angeben mussten und so teilweise nur kleine Beobachtungszahlen zu verzeichnen waren, beispielsweise bei der Antwortmöglichkeit Preise oder Berücksichtung des Engagements im FDM in Einstellungs-/Berufungsverfahren.
+
+```{r bedarfe-4, fig.cap='Größter Anreiz'}
+test <- anreize %>%
+  group_by(ICT_1) %>%
+  mutate(perc_norm = perc / perc[LEAD == "Alle"] - 1) %>%
+  filter(LEAD %in% c("Ja", "Nein")) %>%
+  ungroup() %>%
+  mutate(ICT_1 = fct_reorder(ICT_1, perc_norm, first))
+
+test %>%
+  plot_ly(
+    x = ~perc_norm,
+    y = ~ICT_1,
+    color = ~LEAD,
+    colors = col_lik[c(5, 1)],
+    name = ~ paste0(LEAD, "\n(n=", nn, ")")
+  ) %>%
+  add_bars(
+    text = ~ glue::glue(
+      "{perc_norm}% ({n})",
+      perc_norm = round(perc_norm * 100),
+      n = n
+    ),
+    textfont = list(color = "white", size = 11),
+    insidetextanchor = "middle",
+    textangle = 0,
+    textposition = "inside",
+  ) %>%
+  layout_bar_flip(
+    barmode = "overlay",
+    legend_title = "Leiten Sie ein Team?",
+    range = NULL,
+    xaxis = list(
+      title = list(text = "Unterschied zum Durchschnitt in %", font = list(size = 12)),
+      tickformat = ".0%",
+      range = NULL,
+      zeroline = FALSE,
+      dtick = 0.25,
+      tick0 = 0,
+      tickmode = "linear",
+      gridcolor = "#A0A0A0",
+      tickfont = list(size = 10)
+    )
+  ) %>%
+  layout_title(
+    text = "Umfrageteilnehmende MIT und OHNE Teamleitung im Vergleich:\nWas wäre für Sie der größte Anreiz,\nstärker in das Forschungsdatenmanagement zu investieren?",
+    margin = list(t = 100, b = 60)
+  ) %>%
+  layout_mode_bar()
+```
+
+
+## Bedarf an fachlicher Unterstützung
+
+68% (240 von 353) der Umfrageteilnehmenden gaben an, dass Sie Bedarf (4 und 5 auf einer Likert-Skala von 0 entspricht "kein Bedarf" bis 5 entspricht "hoher Bedarf") an fachlicher Unterstützung zu Datenmanagementplänen hätten.^[Antwortmöglichkeit "kann ich nicht einschätzen" wurde herausgefiltert.]
+
+```{r}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP4_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "kann ich nicht einschätzen", "Filtersprung")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Kein Bedarf", "2", "3", "4", "hoher Bedarf"))) %>%
+  mutate(nn = length(unique(data_id))) %>%
+  count(label, value_decoded, value, nn) %>%
+  group_by(label) %>%
+  mutate(
+    perc = n / sum(n),
+    mean = sum(as.numeric(value) * n) / sum(n),
+    n_group = sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(label = paste0(label, "\nM ", round(mean, 1))) %>%
+  mutate(label = fct_reorder(label, .x = mean, .desc = FALSE))
+```
+
+
+```{r unterstuetzung-1, fig.cap='Unterstützungsbedarf'}
+
+# support %>% plot_ly(x = ~ perc,
+#                  y = ~ label,
+#                  color = ~ value_decoded) %>%
+#   add_bars(
+#     colors = col_lik,
+#     text = ~ paste0(round(perc * 100, 0), "%"),
+#     textposition = 'inside',
+#     insidetextanchor = "middle",
+#     textangle = 0,
+#     insidetextfont = list(color = "white") #, size = 14
+#   ) %>%
+#   layout_bar_flip(barmode = "stack") %>%
+#   layout_title(text = "Welchen Bedarf haben Sie an fachlicher Unterstützung\nzu folgenden Themen?") %>%
+#   layout(legend = list(orientation = 'h')) %>%
+#   layout_caption() %>%
+#   layout_mode_bar()
+```
+
+
+```{r unterstuetzung-2, fig.cap='Unterstützungsbedarf'}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP4_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "kann ich nicht einschätzen", "Filtersprung")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Kein Bedarf", "2", "3", "4", "hoher Bedarf"))) %>%
+  mutate(nn = length(unique(data_id))) %>%
+  count(label, value_decoded, value, nn) %>%
+  group_by(label) %>%
+  mutate(
+    perc = n / sum(n),
+    mean = sum(as.numeric(value) * n) / sum(n),
+    n_group = sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(label = paste0(label, "\nM=", round(mean, 1), ", n=", n_group)) %>%
+  mutate(label = case_when(
+    str_detect(label, "Datenmanagementplan.*") ~ paste0("<b>", label, "</b>"),
+    TRUE ~ label
+  )) %>%
+  mutate(label = fct_reorder(label, .x = mean, .desc = FALSE))
+
+plot_ly(
+  textposition = "inside",
+  insidetextanchor = "middle",
+  textangle = 0,
+  insidetextfont = list(color = "white", size = 11)
+) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "Kein Bedarf"),
+    x = ~perc,
+    y = ~label,
+    name = "Kein Bedarf",
+    marker = list(color = col_lik[5]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    visible = "legendonly"
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "2"),
+    x = ~perc,
+    y = ~label,
+    name = "2",
+    marker = list(color = col_lik[4]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    visible = "legendonly"
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "3"),
+    x = ~perc,
+    y = ~label,
+    name = "3",
+    marker = list(color = col_lik[3]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    visible = "legendonly"
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "4"),
+    x = ~perc,
+    y = ~label,
+    name = "4",
+    marker = list(color = col_lik[2]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")")
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "hoher Bedarf"),
+    x = ~perc,
+    y = ~label,
+    name = "hoher Bedarf",
+    marker = list(color = col_lik[1]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")")
+  ) %>%
+  layout_bar_flip(barmode = "stack") %>%
+  layout_title(text = "Welchen Bedarf haben Sie an fachlicher Unterstützung\nzu folgenden Themen?") %>%
+  layout_caption() %>%
+  layout_mode_bar() %>%
+  layout(legend = list(orientation = "h"))
+```

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>3 Forschungsdatentypen, -formate und -praktiken | Analyse der FDM-Umfrage</title>
+  <meta name="description" content="Dieser Report ist eine Analyse der BUA FDM-Umfrage der Charité." />
+  <meta name="generator" content="bookdown 0.27 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="3 Forschungsdatentypen, -formate und -praktiken | Analyse der FDM-Umfrage" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Dieser Report ist eine Analyse der BUA FDM-Umfrage der Charité." />
+  <meta name="github-repo" content="rstudio/bookdown-demo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="3 Forschungsdatentypen, -formate und -praktiken | Analyse der FDM-Umfrage" />
+  
+  <meta name="twitter:description" content="Dieser Report ist eine Analyse der BUA FDM-Umfrage der Charité." />
+  
+
+
+
+<meta name="date" content="2022-06-21" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="arbeit-mit-personenbezogenen-daten.html"/>
+<link rel="next" href="unterstützungsbedarfe.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.10.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.5.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.5.1/plotly-latest.min.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Analyse der FDM-Umfrage</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>About</a></li>
+<li class="chapter" data-level="1" data-path="umfrageteilnehmende.html"><a href="umfrageteilnehmende.html"><i class="fa fa-check"></i><b>1</b> Umfrageteilnehmende</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="umfrageteilnehmende.html"><a href="umfrageteilnehmende.html#anzahl-der-umfrageteilnehmenden-im-vergleich-mit-anderen-bua-einrichtungen"><i class="fa fa-check"></i><b>1.1</b> Anzahl der Umfrageteilnehmenden im Vergleich mit anderen BUA-Einrichtungen</a></li>
+<li class="chapter" data-level="1.2" data-path="umfrageteilnehmende.html"><a href="umfrageteilnehmende.html#beruflicher-status"><i class="fa fa-check"></i><b>1.2</b> Beruflicher Status</a></li>
+<li class="chapter" data-level="1.3" data-path="umfrageteilnehmende.html"><a href="umfrageteilnehmende.html#freitextantworten"><i class="fa fa-check"></i><b>1.3</b> Freitextantworten</a></li>
+<li class="chapter" data-level="1.4" data-path="umfrageteilnehmende.html"><a href="umfrageteilnehmende.html#kontakt-zum-thema-forschungsdatenmanagement"><i class="fa fa-check"></i><b>1.4</b> Kontakt zum Thema Forschungsdatenmanagement</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="arbeit-mit-personenbezogenen-daten.html"><a href="arbeit-mit-personenbezogenen-daten.html"><i class="fa fa-check"></i><b>2</b> Arbeit mit personenbezogenen Daten</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="arbeit-mit-personenbezogenen-daten.html"><a href="arbeit-mit-personenbezogenen-daten.html#beruflicher-status-1"><i class="fa fa-check"></i><b>2.1</b> Beruflicher Status</a></li>
+<li class="chapter" data-level="2.2" data-path="arbeit-mit-personenbezogenen-daten.html"><a href="arbeit-mit-personenbezogenen-daten.html#teilen-forschungsdaten"><i class="fa fa-check"></i><b>2.2</b> Teilen von Forschungsdaten</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="forschungsdatentypen--formate-und--praktiken.html"><a href="forschungsdatentypen--formate-und--praktiken.html"><i class="fa fa-check"></i><b>3</b> Forschungsdatentypen, -formate und -praktiken</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="forschungsdatentypen--formate-und--praktiken.html"><a href="forschungsdatentypen--formate-und--praktiken.html#forschungsdatentypen-und--formate"><i class="fa fa-check"></i><b>3.1</b> Forschungsdatentypen und -formate</a></li>
+<li class="chapter" data-level="3.2" data-path="forschungsdatentypen--formate-und--praktiken.html"><a href="forschungsdatentypen--formate-und--praktiken.html#zitate"><i class="fa fa-check"></i><b>3.2</b> Zitate</a></li>
+<li class="chapter" data-level="3.3" data-path="forschungsdatentypen--formate-und--praktiken.html"><a href="forschungsdatentypen--formate-und--praktiken.html#beruflicher-status-und-forschungspraktiken"><i class="fa fa-check"></i><b>3.3</b> Beruflicher Status und Forschungspraktiken</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="unterstützungsbedarfe.html"><a href="unterstützungsbedarfe.html"><i class="fa fa-check"></i><b>4</b> Unterstützungsbedarfe</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="unterstützungsbedarfe.html"><a href="unterstützungsbedarfe.html#welche-werkzeuge-fehlen"><i class="fa fa-check"></i><b>4.1</b> Welche Werkzeuge fehlen?</a></li>
+<li class="chapter" data-level="4.2" data-path="unterstützungsbedarfe.html"><a href="unterstützungsbedarfe.html#anzahl-fehlende-technische-werkzeuge"><i class="fa fa-check"></i><b>4.2</b> Anzahl fehlende technische Werkzeuge</a></li>
+<li class="chapter" data-level="4.3" data-path="unterstützungsbedarfe.html"><a href="unterstützungsbedarfe.html#was-wäre-der-größter-anreiz-um-stärker-in-fdm-zu-investieren"><i class="fa fa-check"></i><b>4.3</b> Was wäre der größter Anreiz, um stärker in FDM zu investieren?</a></li>
+<li class="chapter" data-level="4.4" data-path="unterstützungsbedarfe.html"><a href="unterstützungsbedarfe.html#bedarf-an-fachlicher-unterstützung"><i class="fa fa-check"></i><b>4.4</b> Bedarf an fachlicher Unterstützung</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="unterstützung-erhalten.html"><a href="unterstützung-erhalten.html"><i class="fa fa-check"></i><b>5</b> Unterstützung erhalten</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="unterstützung-erhalten.html"><a href="unterstützung-erhalten.html#fair-prinzipien"><i class="fa fa-check"></i><b>5.1</b> FAIR-Prinzipien</a></li>
+<li class="chapter" data-level="5.2" data-path="unterstützung-erhalten.html"><a href="unterstützung-erhalten.html#transparenz"><i class="fa fa-check"></i><b>5.2</b> Transparenz</a></li>
+<li class="chapter" data-level="5.3" data-path="unterstützung-erhalten.html"><a href="unterstützung-erhalten.html#teilen-von-daten"><i class="fa fa-check"></i><b>5.3</b> Teilen von Daten</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="foerderung.html"><a href="foerderung.html"><i class="fa fa-check"></i><b>6</b> Förderstruktur</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="foerderung.html"><a href="foerderung.html#form-von-förderstruktur"><i class="fa fa-check"></i><b>6.1</b> Form von Förderstruktur</a></li>
+<li class="chapter" data-level="6.2" data-path="foerderung.html"><a href="foerderung.html#datenmanagementpläne"><i class="fa fa-check"></i><b>6.2</b> Datenmanagementpläne</a></li>
+<li class="chapter" data-level="6.3" data-path="foerderung.html"><a href="foerderung.html#unterstützung-zu-fdm-themen"><i class="fa fa-check"></i><b>6.3</b> Unterstützung zu FDM-Themen</a></li>
+<li class="chapter" data-level="6.4" data-path="foerderung.html"><a href="foerderung.html#kontakte-zu-fdm"><i class="fa fa-check"></i><b>6.4</b> Kontakte zu FDM</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="teilen-von-forschungsdaten-und-datenschutz.html"><a href="teilen-von-forschungsdaten-und-datenschutz.html"><i class="fa fa-check"></i><b>7</b> Teilen von Forschungsdaten und Datenschutz</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="teilen-von-forschungsdaten-und-datenschutz.html"><a href="teilen-von-forschungsdaten-und-datenschutz.html#mit-wem-teilen-sie-forschungsdaten"><i class="fa fa-check"></i><b>7.1</b> Mit wem teilen Sie Forschungsdaten?</a></li>
+<li class="chapter" data-level="7.2" data-path="teilen-von-forschungsdaten-und-datenschutz.html"><a href="teilen-von-forschungsdaten-und-datenschutz.html#berlin-science-survey"><i class="fa fa-check"></i><b>7.2</b> Berlin Science Survey</a></li>
+<li class="chapter" data-level="7.3" data-path="teilen-von-forschungsdaten-und-datenschutz.html"><a href="teilen-von-forschungsdaten-und-datenschutz.html#datenschutz"><i class="fa fa-check"></i><b>7.3</b> Datenschutz</a></li>
+<li class="chapter" data-level="7.4" data-path="teilen-von-forschungsdaten-und-datenschutz.html"><a href="teilen-von-forschungsdaten-und-datenschutz.html#zitate-1"><i class="fa fa-check"></i><b>7.4</b> Zitate</a>
+<ul>
+<li class="chapter" data-level="7.4.1" data-path="teilen-von-forschungsdaten-und-datenschutz.html"><a href="teilen-von-forschungsdaten-und-datenschutz.html#fdm-lösungen-die-an-der-charité-fehlen"><i class="fa fa-check"></i><b>7.4.1</b> FDM-Lösungen, die an der Charité fehlen</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="bekanntheit-von-instrumenten-und-services.html"><a href="bekanntheit-von-instrumenten-und-services.html"><i class="fa fa-check"></i><b>8</b> Bekanntheit von Instrumenten und Services</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="bekanntheit-von-instrumenten-und-services.html"><a href="bekanntheit-von-instrumenten-und-services.html#satzung-der-charité-zur-sicherung-guter-wissenschaftlicher-praxis"><i class="fa fa-check"></i><b>8.1</b> Satzung der Charité zur Sicherung Guter Wissenschaftlicher Praxis</a></li>
+<li class="chapter" data-level="8.2" data-path="bekanntheit-von-instrumenten-und-services.html"><a href="bekanntheit-von-instrumenten-und-services.html#lom-und-open-data-lom"><i class="fa fa-check"></i><b>8.2</b> LOM und Open Data LOM</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="sandbox.html"><a href="sandbox.html"><i class="fa fa-check"></i><b>9</b> Sandbox</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="sandbox.html"><a href="sandbox.html#kontakt"><i class="fa fa-check"></i><b>9.1</b> Kontakt zu FDM</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="sandbox.html"><a href="sandbox.html#teamleitung"><i class="fa fa-check"></i><b>9.1.1</b> Teamleitung</a></li>
+<li class="chapter" data-level="9.1.2" data-path="sandbox.html"><a href="sandbox.html#softwarecode-eigennutzung"><i class="fa fa-check"></i><b>9.1.2</b> Software/Code Eigennutzung</a></li>
+<li class="chapter" data-level="9.1.3" data-path="sandbox.html"><a href="sandbox.html#statusgruppen"><i class="fa fa-check"></i><b>9.1.3</b> Statusgruppen</a></li>
+<li class="chapter" data-level="9.1.4" data-path="sandbox.html"><a href="sandbox.html#förderung"><i class="fa fa-check"></i><b>9.1.4</b> Förderung</a></li>
+</ul></li>
+<li class="chapter" data-level="9.2" data-path="sandbox.html"><a href="sandbox.html#praktiken"><i class="fa fa-check"></i><b>9.2</b> Forschungspraktiken</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="sandbox.html"><a href="sandbox.html#teamleitung-1"><i class="fa fa-check"></i><b>9.2.1</b> Teamleitung</a></li>
+<li class="chapter" data-level="9.2.2" data-path="sandbox.html"><a href="sandbox.html#sekundärnutzung"><i class="fa fa-check"></i><b>9.2.2</b> Sekundärnutzung</a></li>
+<li class="chapter" data-level="9.2.3" data-path="sandbox.html"><a href="sandbox.html#datenveröffentlichung"><i class="fa fa-check"></i><b>9.2.3</b> Datenveröffentlichung</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="sandbox.html"><a href="sandbox.html#status"><i class="fa fa-check"></i><b>9.3</b> Status</a>
+<ul>
+<li class="chapter" data-level="9.3.1" data-path="sandbox.html"><a href="sandbox.html#teamleitung-2"><i class="fa fa-check"></i><b>9.3.1</b> Teamleitung</a></li>
+<li class="chapter" data-level="9.3.2" data-path="sandbox.html"><a href="sandbox.html#beruflicher-status-und-teamleitung-alternative-darstellung"><i class="fa fa-check"></i><b>9.3.2</b> Beruflicher Status und Teamleitung (alternative Darstellung)</a></li>
+</ul></li>
+<li class="chapter" data-level="9.4" data-path="sandbox.html"><a href="sandbox.html#forschungsdatentypen-und--formate-1"><i class="fa fa-check"></i><b>9.4</b> Forschungsdatentypen und -formate</a></li>
+<li class="chapter" data-level="9.5" data-path="sandbox.html"><a href="sandbox.html#personenbezogene-daten"><i class="fa fa-check"></i><b>9.5</b> Personenbezogene Daten</a>
+<ul>
+<li class="chapter" data-level="9.5.1" data-path="sandbox.html"><a href="sandbox.html#beruflicher-status-2"><i class="fa fa-check"></i><b>9.5.1</b> Beruflicher Status</a></li>
+<li class="chapter" data-level="9.5.2" data-path="sandbox.html"><a href="sandbox.html#teilen-von-daten-1"><i class="fa fa-check"></i><b>9.5.2</b> Teilen von Daten</a></li>
+<li class="chapter" data-level="9.5.3" data-path="sandbox.html"><a href="sandbox.html#dokumentation-von-fdm"><i class="fa fa-check"></i><b>9.5.3</b> Dokumentation von FDM</a></li>
+<li class="chapter" data-level="9.5.4" data-path="sandbox.html"><a href="sandbox.html#stärkster-anreiz"><i class="fa fa-check"></i><b>9.5.4</b> Stärkster Anreiz</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="sandbox.html"><a href="sandbox.html#förderstruktur"><i class="fa fa-check"></i>Förderstruktur</a></li>
+<li class="chapter" data-level="9.6" data-path="sandbox.html"><a href="sandbox.html#unterstützungsbedarfe-1"><i class="fa fa-check"></i><b>9.6</b> Unterstützungsbedarfe</a></li>
+<li class="chapter" data-level="9.7" data-path="sandbox.html"><a href="sandbox.html#teilen-von-forschungsdaten"><i class="fa fa-check"></i><b>9.7</b> Teilen von Forschungsdaten</a></li>
+<li class="chapter" data-level="9.8" data-path="sandbox.html"><a href="sandbox.html#regelungen-zum-datenmanagement-im-team"><i class="fa fa-check"></i><b>9.8</b> Regelungen zum Datenmanagement im Team</a>
+<ul>
+<li class="chapter" data-level="9.8.1" data-path="sandbox.html"><a href="sandbox.html#heatmap-forschungsdatentypen-und--formate"><i class="fa fa-check"></i><b>9.8.1</b> Heatmap Forschungsdatentypen und -formate</a></li>
+<li class="chapter" data-level="9.8.2" data-path="sandbox.html"><a href="sandbox.html#zitate-2"><i class="fa fa-check"></i><b>9.8.2</b> Zitate</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://www.bihealth.org/de/translation/innovationstreiber/quest-center/projekte/quality/concept-development" target="blank">BUA FDM</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Analyse der FDM-Umfrage</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="forschungsdatentypen--formate-und--praktiken" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">3</span> Forschungsdatentypen, -formate und -praktiken<a href="forschungsdatentypen--formate-und--praktiken.html#forschungsdatentypen--formate-und--praktiken" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="forschungsdatentypen-und--formate" class="section level2 hasAnchor" number="3.1">
+<h2><span class="header-section-number">3.1</span> Forschungsdatentypen und -formate<a href="forschungsdatentypen--formate-und--praktiken.html#forschungsdatentypen-und--formate" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Praktiken, Bedarfe und Meinungen sind höchst heterogen, so dass das Forschungsdatenmanagement insgesamt auch sehr vielfältig und fachspezifisch sein muss:</p>
+<p>Viele unterschiedliche Forschungsdatentypen und -formate werden generiert bzw. sind Gegenstand der Forschung.</p>
+<div class="figure"><span style="display:block;" id="fig:praktiken-1"></span>
+<div id="htmlwidget-d760fa3f6992f45b4244" style="width:100%;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d760fa3f6992f45b4244">{"x":{"visdat":{"b6ac180fcd81":["function () ","plotlyVisDat"]},"cur_data":"b6ac180fcd81","attrs":{"b6ac180fcd81":{"x":{},"y":{},"hoverinfo":"text","hovertext":{},"color":{},"colors":["#21527B","#852557"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","text":{},"textposition":"inside","insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":80,"r":10},"barmode":"stack","font":{"family":"Arial"},"xaxis":{"domain":[0,1],"automargin":true,"title":false,"tickformat":".0%","range":[-0.01,1.05],"zeroline":false,"dtick":0.25,"tick0":0,"tickmode":"linear","gridcolor":"#A0A0A0","tickfont":{"size":11}},"yaxis":{"domain":[0,1],"automargin":true,"title":false,"tickfont":{"size":11},"autorange":true,"type":"category","categoryorder":"array","categoryarray":["Geo-Daten (GIS-Daten /<br />Topographische Daten)","Audio / Filme / Videos","Selbstentwickelte oder<br />weiterentwickelte Software","Modellierung / Visualisierungen","Datenbanken","Messdaten / Messreihen","Texte","Bilder / Grafiken","Statistische Daten","Tabellen"]},"legend":{"traceorder":"normal","font":{"size":11},"title":{"text":"<b><\/b>","font":{"size":11}}},"uniformtext":{"minsize":10,"mode":"hide"},"title":{"text":"<b>Welche Forschungsdatentypen und -formate generieren Sie<br />bzw. sind Gegenstand Ihrer Forschung?<\/b>","font":{"size":15},"x":0.5,"y":0.95,"xref":"container","yref":"container"},"paper_bgcolor":"#F2F2F2","plot_bgcolor":"#F2F2F2","annotations":[{"text":"BUA FDM-Umfrage 2021/22, n=466","x":1,"y":0,"hovertext":null,"align":"left","showarrow":false,"xref":"paper","yref":"paper","xanchor":"right","yanchor":"auto","xshift":0,"yshift":-35,"font":{"size":11}}],"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false,"displaylogo":false,"modeBarButtonsToRemove":["zoom","pan","select","lasso2d","zoomIn","zoomOut","autoScale","resetScale","toggleSpikelines","hoverClosest","hoverCompare"],"toImageButtonOptions":{"format":"png","scale":3}},"data":[{"x":[0.218884120171674,0.815450643776824,0.510729613733906,0.0278969957081545,0.562231759656652,0.296137339055794,0.236051502145923,0.817596566523605,0.912017167381974,0.740343347639485],"y":["Audio / Filme / Videos","Bilder / Grafiken","Datenbanken","Geo-Daten (GIS-Daten /<br />Topographische Daten)","Messdaten / Messreihen","Modellierung / Visualisierungen","Selbstentwickelte oder<br />weiterentwickelte Software","Statistische Daten","Tabellen","Texte"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"hovertext":["<b>Audio / Filme / Videos—Ja<\/b><br />102 (21.9%)","<b>Bilder / Grafiken—Ja<\/b><br />380 (81.5%)","<b>Datenbanken—Ja<\/b><br />238 (51.1%)","<b>Geo-Daten (GIS-Daten /<br />Topographische Daten)—Ja<\/b><br />13 (2.8%)","<b>Messdaten / Messreihen—Ja<\/b><br />262 (56.2%)","<b>Modellierung / Visualisierungen—Ja<\/b><br />138 (29.6%)","<b>Selbstentwickelte oder<br />weiterentwickelte Software—Ja<\/b><br />110 (23.6%)","<b>Statistische Daten—Ja<\/b><br />381 (81.8%)","<b>Tabellen—Ja<\/b><br />425 (91.2%)","<b>Texte—Ja<\/b><br />345 (74%)"],"type":"bar","text":["22% (102)","82% (380)","51% (238)","3% (13)","56% (262)","30% (138)","24% (110)","82% (381)","91% (425)","74% (345)"],"textposition":["inside","inside","inside","inside","inside","inside","inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"orientation":"h","name":"Ja","marker":{"color":"rgba(33,82,123,1)","line":{"color":"rgba(33,82,123,1)"}},"error_y":{"color":"rgba(33,82,123,1)"},"error_x":{"color":"rgba(33,82,123,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.781115879828326,0.184549356223176,0.489270386266094,0.972103004291845,0.437768240343348,0.703862660944206,0.763948497854077,0.182403433476395,0.0879828326180258,0.259656652360515],"y":["Audio / Filme / Videos","Bilder / Grafiken","Datenbanken","Geo-Daten (GIS-Daten /<br />Topographische Daten)","Messdaten / Messreihen","Modellierung / Visualisierungen","Selbstentwickelte oder<br />weiterentwickelte Software","Statistische Daten","Tabellen","Texte"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"hovertext":["<b>Audio / Filme / Videos—Nein<\/b><br />364 (78.1%)","<b>Bilder / Grafiken—Nein<\/b><br />86 (18.5%)","<b>Datenbanken—Nein<\/b><br />228 (48.9%)","<b>Geo-Daten (GIS-Daten /<br />Topographische Daten)—Nein<\/b><br />453 (97.2%)","<b>Messdaten / Messreihen—Nein<\/b><br />204 (43.8%)","<b>Modellierung / Visualisierungen—Nein<\/b><br />328 (70.4%)","<b>Selbstentwickelte oder<br />weiterentwickelte Software—Nein<\/b><br />356 (76.4%)","<b>Statistische Daten—Nein<\/b><br />85 (18.2%)","<b>Tabellen—Nein<\/b><br />41 (8.8%)","<b>Texte—Nein<\/b><br />121 (26%)"],"type":"bar","text":["78% (364)","18% (86)","49% (228)","97% (453)","44% (204)","70% (328)","76% (356)","18% (85)","9% (41)","26% (121)"],"textposition":["inside","inside","inside","inside","inside","inside","inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"orientation":"h","name":"Nein","marker":{"color":"rgba(133,37,87,1)","line":{"color":"rgba(133,37,87,1)"}},"error_y":{"color":"rgba(133,37,87,1)"},"error_x":{"color":"rgba(133,37,87,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 3.1: Forschungsdatentypen und -formate
+</p>
+</div>
+<p>Gerätespezifische Daten werden in vielen freien und proprietären Dateiformaten bearbeitet.</p>
+<div class="figure"><span style="display:block;" id="fig:praktiken-wordcloud"></span>
+<img src="03-praktiken_files/figure-html/praktiken-wordcloud-1.png" alt="Forschungsdatentypen und -formate" width="100%" />
+<p class="caption">
+Figure 3.2: Forschungsdatentypen und -formate
+</p>
+</div>
+</div>
+<div id="zitate" class="section level2 hasAnchor" number="3.2">
+<h2><span class="header-section-number">3.2</span> Zitate<a href="forschungsdatentypen--formate-und--praktiken.html#zitate" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><font size="4"></p>
+<blockquote>
+<p>“Es ist wichtig, dass es einem das Arbeiten erleichtert und nicht erschwert durch zu viele Regelungen und Bürden/Hürden”<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a></p>
+</blockquote>
+<blockquote>
+<p>“Alle arbeiten schon genug. Forschungsdatenmanagement muss einfach implementierbar oder besser von Expertinnen übernommen werden. Alles andere ist mehr Arbeit, die dann noch oder nur durch Androhung von Strafen passiert.”<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a></p>
+</blockquote>
+<blockquote>
+<p>“Some of the available training is great, but it can only be general. There is a need for project-specific support and training on real cases.”<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a></p>
+</blockquote>
+<p></font></p>
+</div>
+<div id="beruflicher-status-und-forschungspraktiken" class="section level2 hasAnchor" number="3.3">
+<h2><span class="header-section-number">3.3</span> Beruflicher Status und Forschungspraktiken<a href="forschungsdatentypen--formate-und--praktiken.html#beruflicher-status-und-forschungspraktiken" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Datenaufbereitung für Dritte wird häufiger von WiMis ausgeführt (65% oder 176 von 270) als von Professor*innen (51% oder 29 von 57) oder Doktorand*innen (42% oder 39 von 93).</p>
+<p>Das Teilen von Daten zählt hingegen deutliche häufiger zur Forschungspraktik von Professor*innen (88% oder 50 von 57) als von WiMis (58% oder 157 von 270) oder Dokorand*innen (44% oder 41 von 93). Ähnlich sieht es bei Datenveröffentlichungen bzw. bei der Sekundärnutzung von Daten aus.</p>
+<div class="figure"><span style="display:block;" id="fig:buttons-1"></span>
+<div id="htmlwidget-6a0c55d87be645743e38" style="width:100%;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6a0c55d87be645743e38">{"x":{"visdat":{"b6ac703e7c4a":["function () ","plotlyVisDat"]},"cur_data":"b6ac703e7c4a","attrs":{"b6ac703e7c4a":{"textposition":"inside","insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"colors":["#21527B","#852557"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"bar","color":{},"text":{},"visible":true,"inherit":true},"b6ac703e7c4a.1":{"textposition":"inside","insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"colors":["#21527B","#852557"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"bar","color":{},"text":{},"visible":false,"inherit":true},"b6ac703e7c4a.2":{"textposition":"inside","insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"colors":["#21527B","#852557"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"bar","color":{},"text":{},"visible":false,"inherit":true},"b6ac703e7c4a.3":{"textposition":"inside","insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"colors":["#21527B","#852557"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"bar","color":{},"text":{},"visible":false,"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":100,"r":10},"updatemenus":[{"y":1.13,"x":0.4,"xanchor":"center","bordercolor":"#A6A6A6","active":0,"buttons":[{"method":"update","args":[{"visible":[true,true,false,false,false,false,false,false]}],"label":"Datenaufbereitung für Dritte"},{"method":"update","args":[{"visible":[false,false,true,true,false,false,false,false]}],"label":"Teilen von Daten"},{"method":"update","args":[{"visible":[false,false,false,false,true,true,false,false]}],"label":"Datenveröffentlichung"},{"method":"update","args":[{"visible":[false,false,false,false,false,false,true,true]}],"label":"Sekundärnutzung von Daten"}]}],"barmode":"stack","font":{"family":"Arial"},"xaxis":{"domain":[0,1],"automargin":true,"title":false,"tickformat":".0%","range":[-0.01,1.05],"zeroline":false,"dtick":0.25,"tick0":0,"tickmode":"linear","gridcolor":"#A0A0A0","tickfont":{"size":11}},"yaxis":{"domain":[0,1],"automargin":true,"title":false,"tickfont":{"size":11},"autorange":true,"type":"category","categoryorder":"array","categoryarray":["Andere<br />n=51","Doktorand*in<br />n=93","Wiss. Mitarbeiter*in<br />n=270","Professor*in<br />n=57"]},"legend":{"traceorder":"normal","font":{"size":11},"title":{"text":"<b><\/b>","font":{"size":11}}},"uniformtext":{"minsize":10,"mode":"hide"},"title":{"text":"<b>Beruflicher Status und Forschungspraktiken<br />Welche der folgenden Forschungspraktiken treffen auf Sie zu?<\/b>","font":{"size":15},"x":0.5,"y":0.95,"xref":"container","yref":"container"},"paper_bgcolor":"#F2F2F2","plot_bgcolor":"#F2F2F2","annotations":[{"text":"BUA FDM-Umfrage 2021/22, n=471","x":1,"y":0,"hovertext":null,"align":"left","showarrow":false,"xref":"paper","yref":"paper","xanchor":"right","yanchor":"auto","xshift":0,"yshift":-35,"font":{"size":11}}],"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false,"displaylogo":false,"modeBarButtonsToRemove":["zoom","pan","select","lasso2d","zoomIn","zoomOut","autoScale","resetScale","toggleSpikelines","hoverClosest","hoverCompare"],"toImageButtonOptions":{"format":"png","scale":3}},"data":[{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.549019607843137,0.419354838709677,0.508771929824561,0.651851851851852],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["55% (28)","42% (39)","51% (29)","65% (176)"],"visible":true,"orientation":"h","name":"Ja","marker":{"color":"rgba(33,82,123,1)","line":{"color":"rgba(33,82,123,1)"}},"error_y":{"color":"rgba(33,82,123,1)"},"error_x":{"color":"rgba(33,82,123,1)"},"xaxis":"x","yaxis":"y","frame":null},{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.450980392156863,0.580645161290323,0.491228070175439,0.348148148148148],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["45% (23)","58% (54)","49% (28)","35% (94)"],"visible":true,"orientation":"h","name":"Nein","marker":{"color":"rgba(133,37,87,1)","line":{"color":"rgba(133,37,87,1)"}},"error_y":{"color":"rgba(133,37,87,1)"},"error_x":{"color":"rgba(133,37,87,1)"},"xaxis":"x","yaxis":"y","frame":null},{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.450980392156863,0.440860215053763,0.87719298245614,0.581481481481481],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["45% (23)","44% (41)","88% (50)","58% (157)"],"visible":false,"orientation":"h","name":"Ja","marker":{"color":"rgba(33,82,123,1)","line":{"color":"rgba(33,82,123,1)"}},"error_y":{"color":"rgba(33,82,123,1)"},"error_x":{"color":"rgba(33,82,123,1)"},"xaxis":"x","yaxis":"y","frame":null},{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.549019607843137,0.559139784946237,0.12280701754386,0.418518518518519],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["55% (28)","56% (52)","12% (7)","42% (113)"],"visible":false,"orientation":"h","name":"Nein","marker":{"color":"rgba(133,37,87,1)","line":{"color":"rgba(133,37,87,1)"}},"error_y":{"color":"rgba(133,37,87,1)"},"error_x":{"color":"rgba(133,37,87,1)"},"xaxis":"x","yaxis":"y","frame":null},{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.313725490196078,0.408602150537634,0.719298245614035,0.422222222222222],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["31% (16)","41% (38)","72% (41)","42% (114)"],"visible":false,"orientation":"h","name":"Ja","marker":{"color":"rgba(33,82,123,1)","line":{"color":"rgba(33,82,123,1)"}},"error_y":{"color":"rgba(33,82,123,1)"},"error_x":{"color":"rgba(33,82,123,1)"},"xaxis":"x","yaxis":"y","frame":null},{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.686274509803922,0.591397849462366,0.280701754385965,0.577777777777778],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["69% (35)","59% (55)","28% (16)","58% (156)"],"visible":false,"orientation":"h","name":"Nein","marker":{"color":"rgba(133,37,87,1)","line":{"color":"rgba(133,37,87,1)"}},"error_y":{"color":"rgba(133,37,87,1)"},"error_x":{"color":"rgba(133,37,87,1)"},"xaxis":"x","yaxis":"y","frame":null},{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.137254901960784,0.236559139784946,0.526315789473684,0.351851851851852],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["14% (7)","24% (22)","53% (30)","35% (95)"],"visible":false,"orientation":"h","name":"Ja","marker":{"color":"rgba(33,82,123,1)","line":{"color":"rgba(33,82,123,1)"}},"error_y":{"color":"rgba(33,82,123,1)"},"error_x":{"color":"rgba(33,82,123,1)"},"xaxis":"x","yaxis":"y","frame":null},{"textposition":["inside","inside","inside","inside"],"insidetextanchor":"middle","textangle":0,"textfont":{"color":"white","size":11},"x":[0.862745098039216,0.763440860215054,0.473684210526316,0.648148148148148],"y":["Andere<br />n=51","Doktorand*in<br />n=93","Professor*in<br />n=57","Wiss. Mitarbeiter*in<br />n=270"],"type":"bar","text":["86% (44)","76% (71)","47% (27)","65% (175)"],"visible":false,"orientation":"h","name":"Nein","marker":{"color":"rgba(133,37,87,1)","line":{"color":"rgba(133,37,87,1)"}},"error_y":{"color":"rgba(133,37,87,1)"},"error_x":{"color":"rgba(133,37,87,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 3.3: Forschungspraktiken
+</p>
+</div>
+
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="5">
+<li id="fn5"><p>Antwort auf die Freitextfrage: Haben Sie weitere Kommentare oder Ergänzungen?<a href="forschungsdatentypen--formate-und--praktiken.html#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>Antwort auf die Freitextfrage: Haben Sie weitere Kommentare oder Ergänzungen?<a href="forschungsdatentypen--formate-und--praktiken.html#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn7"><p>Antwort auf die Freitextfrage: Haben Sie weitere Kommentare oder Ergänzungen?<a href="forschungsdatentypen--formate-und--praktiken.html#fnref7" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+<div class="footer"> 
+<hr>
+
+<p style="text-align: center;"><a href="https://www.bihealth.org/de/translation/innovationstreiber/quest-center/teams/projektteam-open-data-und-forschungsdatenmanagement">Projektteam Open Data und Forschungsdatenmanagement</a></p>
+
+
+<!-- Add icon library -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<!-- Add font awesome icons -->
+<p style="text-align: center;">
+    <a href="mailto:forschungsdatenmanagement@bih-charite.de" class="fa fa-envelope"></a>
+    <a href="https://github.com/jantau" class="fa fa-github"></a>
+</p>
+
+<hr>
+
+<!-- Add license info -->
+<p style="text-align: center;">
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+</p>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="arbeit-mit-personenbezogenen-daten.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="unterstützungsbedarfe.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 1
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/03-praktiken.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "section",
+"scroll_highlight": true
+}
+});
+});
+</script>
+
+</body>
+
+</html>
