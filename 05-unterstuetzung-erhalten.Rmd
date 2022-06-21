@@ -1,0 +1,191 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+# Unterstützung erhalten
+
+37,4% (173 von 463) der Umfrageteilnehmenden haben bereits fachliche Unterstützung durch Expert*innen zu Datenmanagement-Themen in Anspruch genommen. 54,2% (251 von 463) gaben an, noch keine Unterstützung in Anspruch genommen zu haben und 8,4% (39 von 463) waren sich nicht sicher, ob sie bereits Unterstützung in Anspruch genommen haben.
+
+```{r support-erhalten-1, fig.cap="Fachliche Unterstützung"}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP1$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, value_decoded) %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(perc = n / nn) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Ja", "Nein", "Bin mir nicht sicher"))) %>%
+  arrange(value_decoded)
+
+support %>%
+  plot_ly(
+    labels = ~value_decoded,
+    values = ~n,
+    textposition = "inside",
+    texttemplate = ~ str_glue("{value_decoded}
+                           {round(perc*100, 1)}% ({n})"),
+    showlegend = FALSE,
+    direction = "clockwise",
+    sort = FALSE,
+    # pull = c(0, 0, 0.1, 0, 0, 0),
+    marker = list(
+      colors = col_lik[c(5, 1, 3)],
+      line = list(col = "#FFFFFF", width = 1)
+    ),
+    type = "pie"
+  ) %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+## FAIR-Prinzipien
+
+Umfrageteilnehmende, die bereits fachliche Unterstützung in Anspruch genommen haben, kennen häufiger die FAIR-Prinzipien und haben sie umgesetzt (32% oder 55 von 173) als Umfrageteilnehmende, die noch keine fachliche Unterstützung durch Expert*innen in Anspruch genommen haben (17% oder 42 von 251).
+
+```{r support-erhalten-2, fig.cap="Fachliche Unterstützung und FAIR"}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP1$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id,
+    support = value_decoded
+  )
+
+fair <- data %>%
+  filter(str_detect(question_id, "^REG_7$")) %>%
+  filter(!value %in% c("-998")) %>%
+  select(data_id,
+    fair = value_decoded
+  )
+
+sup_fair <- support %>%
+  full_join(fair, by = "data_id") %>%
+  drop_na() %>%
+  add_count(name = "nn") %>%
+  count(support, fair, nn) %>%
+  group_by(support) %>%
+  mutate(
+    perc = n / sum(n),
+    n_group = sum(n),
+    rank = max(perc[fair == "Bekannt und umgesetzt"])
+  ) %>%
+  ungroup() %>%
+  mutate(support = paste0(support, "\nn=", n_group)) %>%
+  mutate(
+    support = fct_reorder(support, rank),
+    fair = factor(fair, levels = c(
+      "Bekannt und umgesetzt", "Bekannt, aber nicht umgesetzt",
+      "Unbekannt", "n. geantwortet"
+    ))
+  )
+
+sup_fair %>%
+  plot_ly(
+    x = ~perc,
+    y = ~support,
+    color = ~fair,
+    colors = col_lik[c(5, 4, 1, 3)]
+  ) %>%
+  add_bars_text() %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Kennen oder praktizieren Sie die FAIR-Prinzipien") %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+## Transparenz
+Umfrageteilnehmende, die bereits fachliche Unterstützung in Anspruch genommen haben, gaben häufiger an, dass ihre FDM-Praxis durch Transparenz beeinflusst sei (47% oder 80 von 170) als Umfrageteilnehmende, die noch keine fachliche Unterstützung durch Expert*innen in Anspruch genommen haben (39% oder 94 von 243).
+```{r support-erhalten-3, fig.cap="Fachliche Unterstützung und Transparenz"}
+transparenz <- data %>%
+  filter(str_detect(question_id, "^REG1_4$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id,
+    transparenz = value_decoded
+  )
+
+sup_transparenz <- support %>%
+  full_join(transparenz, by = "data_id") %>%
+  drop_na() %>%
+  add_count(name = "nn") %>%
+  count(support, transparenz, nn) %>%
+  group_by(support) %>%
+  mutate(
+    perc = n / sum(n),
+    n_group = sum(n),
+    rank = max(perc[transparenz == "stark beeinflusst"])
+  ) %>%
+  ungroup() %>%
+  mutate(support = paste0(support, "\nn=", n_group)) %>%
+  mutate(
+    support = fct_reorder(support, rank),
+    transparenz = factor(transparenz, levels = c("stark beeinflusst", "2", "3", "4", "gar nicht beeinflusst", "nicht zutreffend"))
+  )
+
+sup_transparenz %>%
+  plot_ly(
+    x = ~perc,
+    y = ~support,
+    color = ~transparenz,
+    colors = col_lik[c(5, 4, 2, 1, 3)]
+  ) %>%
+  add_bars_text() %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Inwieweit ist FDM-Praxis durch Transparenz beeinflusst") %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+
+## Teilen von Daten
+
+Umfrageteilnehmende, die bereits fachliche Unterstützung in Anspruch genommen haben, gaben häufiger an, dass sie Daten teilen würden (63% oder 109 von 173) als Umfrageteilnehmende, die noch keine fachliche Unterstützung durch Expert*innen in Anspruch genommen haben (56% oder 141 von 251).
+
+```{r support-erhalten-4, fig.cap="Fachliche Unterstützung und Teilen von Daten"}
+teilen <- data %>%
+  filter(str_detect(question_id, "^PRA_5$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id,
+    teilen = value_decoded
+  ) %>%
+  mutate(teilen = case_when(
+    teilen == "Teilen von Daten" ~ "Ja",
+    is.na(teilen) ~ "Nein"
+  ))
+
+sup_teilen <- support %>%
+  full_join(teilen, by = "data_id") %>%
+  drop_na() %>%
+  add_count(name = "nn") %>%
+  count(support, teilen, nn) %>%
+  group_by(support) %>%
+  mutate(
+    perc = n / sum(n),
+    n_group = sum(n),
+    rank = max(perc[teilen == "Ja"])
+  ) %>%
+  ungroup() %>%
+  mutate(support = paste0(support, "\nn=", n_group)) %>%
+  mutate(
+    support = fct_reorder(support, rank),
+    teilen = factor(teilen, levels = c("Ja", "Nein"))
+  )
+
+sup_teilen %>%
+  plot_ly(
+    x = ~perc,
+    y = ~support,
+    color = ~teilen,
+    colors = col_lik[c(5, 1)]
+  ) %>%
+  add_bars_text() %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Teilen von Daten") %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
