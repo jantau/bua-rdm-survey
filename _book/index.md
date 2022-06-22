@@ -1,6 +1,6 @@
 --- 
 title: "Analyse der FDM-Umfrage"
-date: "2022-06-21"
+date: "2022-06-22"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography:

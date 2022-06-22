@@ -74,7 +74,7 @@ prop_df <- data.frame(
 )
 
 set.seed(42)
-ggplot(prop_df, aes(label = format, size = n, color = type)) + # , x = type
+ggplot(prop_df, aes(label = format, size = n, color = col_2_cat[1])) + # ,color = type, x = type
 
   geom_text_wordcloud_area(eccentricity = 1) +
   # geom_text_wordcloud() +
@@ -82,9 +82,8 @@ ggplot(prop_df, aes(label = format, size = n, color = type)) + # , x = type
   scale_radius(range = c(5, 15), limits = c(0, NA)) +
   #  scale_x_discrete(breaks = NULL) +
   theme_minimal() +
-  scale_color_manual(values = col_lik[c(5, 1)]) +
-  ggtitle("<b>Welche Forschungsdatentypen und -formate generieren Sie<br>bzw. sind Gegenstand Ihrer Forschung?</b><br><br>Gerätespezifische Daten in <span style='color:#21527B;'>freien Dateiformaten</span> und in <span style='color:#852557;'>proprietären Dateiformaten
-</span>") +
+  scale_color_manual(values = col_lik[c(5)]) +
+  ggtitle("<b>Welche Forschungsdatentypen und -formate generieren Sie<br>bzw. sind Gegenstand Ihrer Forschung?</b>") + # <br><br>Gerätespezifische Daten in <span style='color:#21527B;'>freien Dateiformaten</span> und in <span style='color:#852557;'>proprietären Dateiformaten </span>
   theme(
     plot.title = element_markdown(family = "Arial", size = 10.5, hjust = 0.5),
     plot.background = element_rect(fill = "#F2F2F2", linetype = 0),
