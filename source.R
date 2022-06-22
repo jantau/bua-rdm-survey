@@ -22,7 +22,11 @@ library(tidyverse)
 
 
 # Load data
-load("input/fdm_survey_data_long_format_complete_surveys.Rdata")
+# Input data is stored locally for data protection reasons
+load("/Users/jan/Documents/bua-rdm-survey-data/fdm_survey_data_long_format_complete_surveys.Rdata")
+
+# Input data can be saved to the repository at a later time when free text data has been checked for personal info.
+# load("input/fdm_survey_data_long_format_complete_surveys.Rdata")
 data <- fdm_survey_data_complete_surveys
 
 # Color scale
