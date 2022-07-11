@@ -6,10 +6,8 @@ bookdown::gitbook:
       collapse: section
       scroll_highlight: yes
       before: |
-        <li><a href="./">Analyse der FDM-Umfrage</a></li>
-      after: |
-        <li><a href="https://www.bihealth.org/de/translation/innovationstreiber/quest-center/projekte/quality/concept-development" target="blank">BUA FDM</a></li>
-    edit: https://github.com/jantau/bua-rdm-survey/edit/main/%s
+        <li class="toc-logo"><a href="https://www.bihealth.org/de/translation/innovationstreiber/quest-center"><img src="images/BIH-QUEST_Logo_2021_rgb.png"></a></li>
+        <li><b><a href="./">Bedarfserhebung FDM 2021/22</a></b></li>
     fontsettings:
       theme: white
       family: sans
@@ -34,3 +32,8 @@ bookdown::pdf_book:
   citation_package: natbib
   keep_tex: yes
 bookdown::epub_book: default
+# [before] <li><a href="./">Analyse der FDM-Umfrage</a></li>
+# [after] <li><a href="https://www.bihealth.org/de/translation/innovationstreiber/quest-center/projekte/quality/concept-development" target="blank">BUA FDM</a></li>
+#      after: |
+#        <li><a href="./">Analyse der FDM-Umfrage</a></li>
+#  [level with toc] edit: https://github.com/jantau/bua-rdm-survey/edit/main/%s

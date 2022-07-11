@@ -1,0 +1,203 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+# Unterstützung in FDM-Fragen wird oft in Anspruch genommen und geht mit größerem FDM-Wissen einher
+
+## FDM-Unterstützung wird oft in Anspruch genommen
+
+Unterstützung im FDM wird, zumindest wenn man das FDM weit fasst[^support], von sehr vielen Forschenden in Anspruch genommen (37%; weitere 8% waren sich nicht sicher).
+
+[^support]: Die Frage nach in Anspruch genommener Unterstützung durch Expert\*innen bezog sich explizit auf Datenmanagement-Themen. Im erläuternden Hinweis wurde aber nicht eingeschränkt, aus welchem Fachbereich heraus die Expert\*innen diese Unterstützung leisteten: "Fachliche Unterstützung bezieht sich hier auf Schulungen, Fortbildungen, Beratungen o.ä. durch Expert*innen"
+
+```{r support-erhalten-1, fig.cap="Fachliche Unterstützung"}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP1$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, value_decoded) %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(perc = n / nn) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Ja", "Nein", "Bin mir nicht sicher"))) %>%
+  arrange(value_decoded)
+
+support %>%
+  plot_ly(
+    labels = ~value_decoded,
+    values = ~n,
+    textposition = "inside",
+    texttemplate = ~ str_glue("{value_decoded}
+                           {round(perc*100, 1)}% ({n})"),
+    showlegend = FALSE,
+    direction = "clockwise",
+    sort = FALSE,
+    # pull = c(0, 0, 0.1, 0, 0, 0),
+    marker = list(
+      colors = col_lik[c(5, 1, 3)],
+      line = list(col = "#FFFFFF", width = 1)
+    ),
+    type = "pie"
+  ) %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+## Unterstützung erfolgt sowohl zum Datenschutz als auch zu genuinen FDM-Themen
+
+Unterstützung erfolgte am häufigsten zum Thema Datenschutz. Ca. die Hälfte aller Teilnehmenden, die FDM-Unterstützung erhielten, bekamen diese (auch) zum Thema Datenschutz. Aber auch zu einigen genuinen FDM-Themen (Datenspeicherung- und Archivierung, Teilen von Daten, FDM allgemein) erhielten die Teilnehmenden oft Unterstützung bzw. eine Einführung (≥38% für alle drei Themen).
+
+```{r support-thema, fig.cap="Fachliche Unterstützung"}
+# Zu welchem der folgenden Themen haben Sie fachliche Unterstützung erhalten?
+
+support_thema <- data %>%
+  filter(str_detect(question_id, "^SUP2_([1-9]$|10)")) %>%
+  filter(!value %in% c("-998", "-989")) %>%
+  select(data_id, fct_levels, value) %>%
+  drop_na() %>%
+  mutate(nn = length(unique(data_id))) %>%
+  count(fct_levels, value, nn) %>%
+  mutate(perc = n / nn) %>%
+  mutate(fct_levels = str_wrap(fct_levels, 30)) %>%
+  mutate(fct_levels = fct_reorder(fct_levels, n, first, .desc = FALSE)) %>%
+  mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein")))
+
+plot_ly(
+  x = ~ perc,
+  y = ~ fct_levels,
+  hoverinfo = "text",
+  hovertext = ~ str_glue("<b>{fct_levels}—{value}</b>
+    {n} ({round(perc*100, 1)}%)"),
+  text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+  textposition = "inside",
+  insidetextanchor = "middle",
+  textangle = 0,
+  textfont = list(color = "white", size = 11)
+) %>% 
+  add_bars(
+    data = support_thema %>% filter(value == "Ja"),
+    name = "Ja",
+    marker = list(color = col_lik[5])
+  ) %>%
+    add_bars(
+    data = support_thema %>% filter(value == "Nein"),
+    name = "Nein",
+    marker = list(color = col_lik[1]),
+    visible = "legendonly"
+  ) %>%
+  layout_bar_flip(barmode = "stack", autorange = "reversed") %>%
+  layout_title(
+    margin = list(t = 80, b = 50),
+    text = "Zu welchem der folgenden Themen\nhaben Sie fachliche Unterstützung erhalten?"
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar() 
+
+```
+
+## Wer FDM-Unterstützung erhielt, kennt die FAIR-Kriterien deutlich häufiger
+
+Die FAIR-Kriterien[^fair] sind unter Teilnehmenden, die FDM-Unterstützung erhielten, deutlich bekannter (60% vs. 39%). Sie werden nach eigenen Angaben auch sehr viel häufiger umgesetzt (35% vs. 19%). Kausalität scheint hier wahrscheinlich, ggf. kann dies aber auch an den Spezifika der Teilgruppe liegen, die Unterstützung beim FDM suchte.
+
+[^fair]: In der Umfrage wurde hierzu folgende Erläuterung gegeben: "FAIR (Findable, Accessible, Interoperable, Reusable) steht für nachhaltiges, qualitätsgesichertes Forschungsdatenmanagement. Gegenstand der FAIR Data-Prinzipien ist eine optimale Aufbereitung der Forschungsdaten, die sowohl für Menschen als auch Maschinen auffindbar, zugänglich, interoperabel und wiederverwendbar sein sollen."
+
+```{r support-erhalten-2, fig.cap="Fachliche Unterstützung und FAIR", out.height="450px"}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP1$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id,
+    support = value_decoded
+  )
+
+fair <- data %>%
+  filter(str_detect(question_id, "^REG_7$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id,
+    fair = value_decoded
+  )
+
+sup_fair <- support %>%
+  full_join(fair, by = "data_id") %>%
+  drop_na() %>%
+  add_count(name = "nn") %>%
+  count(support, fair, nn) %>%
+  group_by(support) %>%
+  mutate(
+    perc = n / sum(n),
+    n_group = sum(n),
+    rank = max(perc[fair == "Bekannt und umgesetzt"])
+  ) %>%
+  ungroup() %>%
+  mutate(support = paste0(support, "\nn=", n_group)) %>%
+  mutate(
+    support = fct_reorder(support, rank),
+    fair = factor(fair, levels = c(
+      "Bekannt und umgesetzt", "Bekannt, aber nicht umgesetzt",
+      "Unbekannt", "n. geantwortet"
+    ))
+  )
+
+sup_fair %>%
+  plot_ly(
+    x = ~perc,
+    y = ~support,
+    color = ~fair,
+    colors = col_lik[c(5, 4, 1, 3)]
+  ) %>%
+  add_bars_text() %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Kennen o. praktizieren Sie die FAIR-Prinzipien?") %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()  
+```
+
+## Wer FDM-Unterstützung erhielt, misst Transparenz höhere Bedeutung bei
+
+Wer FDM-Unterstützung erhielt, gibt zudem an, dass die eigene FDM-Praxis stärker von Transparenz beeinflusst wird. Allerdings war dieser Effekt nicht sehr ausgeprägt – wer Unterstützung erhielt, gab zu 47% an, „stark durch Transparenz beeinflusst“ zu sein, wer keine erhielt, zu 40%.
+
+```{r support-erhalten-3, fig.cap="Fachliche Unterstützung und Transparenz", out.height="450px"}
+transparenz <- data %>%
+  filter(str_detect(question_id, "^REG1_4$")) %>%
+  filter(!value %in% c("-998", "-999", "6")) %>%
+  select(data_id,
+    transparenz = value_decoded
+  )
+
+sup_transparenz <- support %>%
+  full_join(transparenz, by = "data_id") %>%
+  drop_na() %>%
+  add_count(name = "nn") %>%
+  count(support, transparenz, nn) %>%
+  group_by(support) %>%
+  mutate(
+    perc = n / sum(n),
+    n_group = sum(n),
+    rank = max(perc[transparenz == "stark beeinflusst"])
+  ) %>%
+  ungroup() %>%
+  mutate(support = paste0(support, "\nn=", n_group)) %>%
+  mutate(
+    support = fct_reorder(support, rank),
+    transparenz = factor(transparenz, levels = c("stark beeinflusst", "2", "3", "4", "gar nicht beeinflusst", "nicht zutreffend"))
+  )
+
+sup_transparenz %>%
+  plot_ly(
+    x = ~perc,
+    y = ~support,
+    color = ~transparenz,
+    colors = col_lik[c(5, 4, 2, 1, 3)]
+  ) %>%
+  add_bars_text() %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Wie beeinflusst Transparenz die FDM-Praxis?") %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+

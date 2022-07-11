@@ -1,34 +1,21 @@
 ---
 output: html_document
+always_allow_html: true
 editor_options: 
   chunk_output_type: console
 ---
 
-# Umfrageteilnehmende
+# Forschungsdatenmanagement (FDM) ist von hoher Relevanz für Forschende {#relevanz}
 
 ```{r, include=FALSE}
 source("source.R")
 ```
 
-Das Thema Forschungsdatenmanagement ruft großes Interesse hervor und ist von hoher Relevanz für Forschende:
+## Besonders viele Umfrageteilnehmende an der Charité
 
-<font size="3">
+Über die BUA-Einrichtungen hinweg haben 975 Teilnehmende die Umfrage abgeschlossen (komplett ausgefüllt). 48,3% (471) davon waren Angehörige der Charité. Dies spricht für eine besonders hohe Relevanz des Themas für Forschende der Charité.
 
-> "Super, dass FDM mehr berücksichtigt wird"[^interesse-fdm-1]
-
-[^interesse-fdm-1]: Antwort auf die Freitextfrage: Haben Sie weitere Kommentare oder Ergänzungen?
-
-> "Danke für das wichtige Thema"[^interesse-fdm-2]
-
-[^interesse-fdm-2]: Antwort auf die Freitextfrage: Haben Sie weitere Kommentare oder Ergänzungen?
-
-</font>
-
-## Anzahl der Umfrageteilnehmenden im Vergleich mit anderen BUA-Einrichtungen
-
-Über die BUA-Einrichtungen hinweg haben 975 Teilnehmende die Umfrage abgeschlossen (komplett ausgefüllt). Von den Befragten haben 48,3% (471 von 975) als Angehörige der Charité die Umfrage der Charité beantwortet. Der hohe Anteil an Charité-Angehörigen an den Umfrageteilnehmenden demonstriert die hohe Relevanz des Themas für Forschende der Charité.
-
-```{r demo-0, fig.cap="Umfrageteilnehmende nach BUA-Einrichtungen"}
+```{r demo-bua, fig.cap="Verteilung der Umfrage-Teilnehmenden nach BUA-Einrichtungen"}
 charite <- data %>%
   distinct(data_id) %>%
   nrow()
@@ -58,7 +45,7 @@ plot_ly(
   ),
   type = "pie"
 ) %>%
-  layout_title(text = "Umfrageteilnehmende pro BUA-Einrichtung") %>%
+  layout_title(text = "Umfrage-Teilnehmende nach BUA-Einrichtung") %>%
   layout_caption(text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn} (alle BUA-Einrichtungen)",
     nn = sum(bua_num)
   )) %>%
@@ -66,62 +53,246 @@ plot_ly(
   layout(uniformtext = list(minsize = 11, mode = "hide"))
 ```
 
-## Beruflicher Status
+## Hohe Beteiligung von Führungskräften
 
-Von den 471 Umfrageteilnehmenden der Charité gaben 12,1% (57 von 471) an, den beruflichen Status Professor\*in zu haben.
+171 Teilnehmende (36,3%) gaben an, ein Team zu leiten, so dass es eine hohe Beteiligung von Führungskräften gab. Von diesen waren wiederum 55 Teilnehmende (32,3%) Professor*innen. Die größte Gruppe in der Umfrage stellten wissenschaftliche Mitarbeitende mit 270 Teilnehmenden (57,3%).
 
-Von den Befragten leiten 36,3% (171 von 471) ein Team.
+```{r demo-status, fig.cap="Beruflicher Status der Teilnehmenden"}
+# Pie chart was removed in favor for sankey diagram
 
-```{r demo-1, fig.cap="Beruflicher Status der Umfrageteilnehmenden"}
-levels <- c("Professor*in", "Doktorand*in", "Wissenschaftliche*r Mitarbeiter*in", "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)", "Technische*r Mitarbeiter*in", "Andere")
+# levels <- c("Professor*in", "Doktorand*in", "Wissenschaftliche*r Mitarbeiter*in", "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)", "Technische*r Mitarbeiter*in", "Andere")
+# 
+# labels <- levels %>%
+#   str_trunc(40) %>%
+#   str_wrap(30)
+# 
+# sta <- data %>%
+#   filter(str_detect(question_id, "^STA$")) %>%
+#   group_by(value_decoded) %>%
+#   count() %>%
+#   ungroup() %>%
+#   mutate(
+#     nn = sum(n),
+#     perc = n / sum(n)
+#   ) %>%
+#   mutate(value_decoded = factor(value_decoded,
+#     levels = levels,
+#     labels = labels
+#   )) %>%
+#   mutate(value_decoded = fct_reorder(value_decoded, perc, .desc = TRUE)) %>%
+#   arrange(-perc)
+# 
+# col <- c(col_cat, " #a675d7")
+# 
+# sta %>%
+#   plot_ly(
+#     labels = ~value_decoded,
+#     values = ~n,
+#     textposition = "inside",
+#     texttemplate = ~ str_glue("{value_decoded}
+#     {round(perc*100, 1)}% ({n})"),
+#     showlegend = FALSE,
+#     direction = "clockwise",
+#     pull = c(0, 0, 0.1, 0, 0, 0),
+#     marker = list(
+#       colors = col,
+#       line = list(col = "#FFFFFF", width = 1)
+#     ),
+#     type = "pie"
+#   ) %>%
+#   layout_title(text = "Was ist Ihr beruflicher Status?") %>%
+#   layout_caption() %>%
+#   layout_mode_bar() %>%
+#   layout(uniformtext = list(minsize = 11, mode = "hide"))
+```
 
-labels <- levels %>%
-  str_trunc(40) %>%
-  str_wrap(30)
+
+
+```{r}
+lead <- data %>%
+  filter(str_detect(question_id, "^LEAD$")) %>%
+  filter(value %in% c("0", "1")) %>%
+  mutate(value = factor(value, levels = c(0, 1), labels = c("Nein", "Ja"))) %>%
+  select(data_id, value)
+
+ird <- data %>%
+  filter(str_detect(question_id, "^IRD$")) %>%
+  filter(value %in% c("0", "1", "2")) %>%
+  mutate(value = factor(value, levels = c(0, 1, 2), labels = c("Nein", "Ja", "Ich weiß nicht"))) %>%
+  select(data_id, value)
 
 sta <- data %>%
   filter(str_detect(question_id, "^STA$")) %>%
-  group_by(value_decoded) %>%
-  count() %>%
-  ungroup() %>%
-  mutate(
-    nn = sum(n),
-    perc = n / sum(n)
-  ) %>%
-  mutate(value_decoded = factor(value_decoded,
-    levels = levels,
-    labels = labels
+  mutate(status = case_when(
+    value_decoded == "Wissenschaftliche*r Mitarbeiter*in" ~ "Wiss. Mitarbeiter*in",
+    value_decoded == "Doktorand*in" ~ "Doktorand*in",
+    value_decoded == "Professor*in" ~ "Professor*in",
+    value_decoded == "Technische*r Mitarbeiter*in" ~ "Andere",
+    value_decoded == "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)" ~ "Andere",
+    value_decoded == "Andere" ~ "Andere"
   )) %>%
-  mutate(value_decoded = fct_reorder(value_decoded, perc, .desc = TRUE)) %>%
-  arrange(-perc)
+  select(data_id, status)
 
-col <- c(col_cat, " #a675d7")
 
-sta %>%
-  plot_ly(
-    labels = ~value_decoded,
-    values = ~n,
-    textposition = "inside",
-    texttemplate = ~ str_glue("{value_decoded}
-    {round(perc*100, 1)}% ({n})"),
-    showlegend = FALSE,
-    direction = "clockwise",
-    pull = c(0, 0, 0.1, 0, 0, 0),
-    marker = list(
-      colors = col,
-      line = list(col = "#FFFFFF", width = 1)
-    ),
-    type = "pie"
-  ) %>%
-  layout_title(text = "Was ist Ihr beruflicher Status?") %>%
-  layout_caption() %>%
-  layout_mode_bar() %>%
-  layout(uniformtext = list(minsize = 11, mode = "hide"))
+test <- sta %>%
+  full_join(lead, by = "data_id") %>%
+  count(status, value)
+
+test <- sta %>%
+  inner_join(ird, by = "data_id") %>%
+  count(status, value)
+
+
 ```
 
-## Freitextantworten
 
 ```{r}
+# Complex sankey diagram removed in favor of less complex diagram (without "Arbeit mit personenbez. Daten")
+# 
+# fig <- plot_ly(
+#     type = "sankey",
+#     orientation = "h",
+#     textfont = list(size = 12, color = "black"),
+# 
+#     node = list(
+#       label = c(
+#         "Teamleitung",
+#         "KEINE Teamleitung",
+#         "Professor*in",
+#         "Wiss. Mitarbeiter*in",
+#         "Doktorand*in",
+#         "Andere",
+#         "Arbeit mit personenbez. Daten",
+#         "KEINE Arbeit mit personenbez. Daten",
+#         "Ich weiß nicht"
+#       ),
+#       color = c(
+#         "#21527BCC",
+#         "#852557CC",
+#         "#D873AB", # 2
+#         "#367BBA", # 3
+#         "#A6A6A6", # 4
+#         "#E1C047", # 5
+#         "#21527B", 
+#         "#852557CC",
+#         "#767676CC"
+#       ), 
+#       pad = 15,
+#       thickness = 20,
+#       line = list(
+#         color = "grey",
+#         width = 0.5
+#       )
+#       #,
+#       #x = c(0.01, 0.01, 0.5, 0.5, 0.5, 0.5, 0.99, 0.99, 0.99),
+#       #y = c(0.25, 0.75,  0.1, 0.4, 0.75, 0.9, 0.2, 0.75, 0.99)
+#     ),
+# 
+#     link = list(
+#       source = c(0, 1, 0, 1,   0, 1, 0, 1,   2, 2, 2,  3, 3, 3,  4, 4, 4,  5, 5, 5),
+#       target = c(2, 2, 3, 3,   4, 4, 5, 5,   6, 7, 8,  6, 7, 8,  6, 7, 8,  6, 7, 8),
+#       value =  c(55,2,90,180,  7,86,19,32,   47, 9,1 , 187,76,5,  57,34,2,  25, 22, 0),
+#       color = c(
+#         "#D873AB80",
+#         "#D873AB80",
+#         "#367BBA80",
+#         "#367BBA80",
+#         "#A6A6A680",
+#         "#A6A6A680",
+#         "#E1C04780",
+#         "#E1C04780",
+#         "#D873AB80",
+#         "#D873AB80",
+#         "#D873AB80",
+#         "#367BBA80",
+#         "#367BBA80",
+#         "#367BBA80",
+#         "#A6A6A680",
+#         "#A6A6A680",
+#         "#A6A6A680",
+#         "#E1C04780",
+#         "#E1C04780",
+#         "#E1C04780"
+# 
+#       )
+#     )
+#   )
+# fig %>%
+#   layout_mode_bar() %>%
+#   layout_caption(nn = 471) %>%
+#   layout_title(text = "Teamleitung, beruflicher Status\nund Arbeit mit personenbezogenen Daten\n(Sankey Diagram)", margin = list(l = 30, r = 30, t = 100))
+```
+
+```{r demo-status-sankey, fig.cap="Verteilung der Umfrage-Teilnehmenden von der Charité nach Statusgruppen und Teamleitung, sowie Zusammenhang zwischen diesen beiden Angaben"}
+# Sankey diagram
+
+fig <- plot_ly(
+    type = "sankey",
+    orientation = "h",
+    textfont = list(size = 14, color = "black"),
+    node = list(
+      label = c(
+        "Professor*in (57)",
+        "Wiss. Mitarbeiter*in (270)",
+        "Doktorand*in (93)",
+        "Andere (51)",
+        "Teamleitung (171)",
+        "KEINE Teamleitung (300)"
+      ),
+      color = c(
+        "#D873AB", # 0
+        "#367BBA", # 1
+        "#A6A6A6", # 2
+        "#E1C047", # 3
+        "#21527BCC",
+        "#852557CC"
+      ), 
+      customdata = round(c(57,270,51,93,171,300)/471*100,1),
+      hovertemplate = "%{label}
+      Perc: %{customdata}%<extra></extra>",
+      pad = 15,
+      thickness = 20,
+      line = list(
+        color = "grey",
+        width = 0
+      )
+    ),
+    link = list(
+      source = c(0, 0, 1, 1,  2, 2, 3, 3),
+      target = c(4, 5, 4, 5,  4, 5, 4, 5),
+      #value = c(55L,2L, 90L,180L, 7L,86L, 19L,32L),
+      value =  c(55,2, 90,180, 7,86, 19,32),
+      customdata = round(c(55,2, 90,180, 7,86, 19,32)/471*100,1),
+      color = c(
+        "#D873AB80",
+        "#D873AB80",
+        "#367BBA80",
+        "#367BBA80",
+        "#A6A6A680",
+        "#A6A6A680",
+        "#E1C04780",
+        "#E1C04780"
+      ),
+      hovertemplate =
+      "Quelle: %{source.label}
+      Ziel: %{target.label}
+      Perc: %{customdata}%"
+    )
+  )
+fig %>%
+  layout_mode_bar() %>%
+  layout_caption(nn = 471) %>%
+  layout_title(text = "Beruflicher Status und Teamleitung", margin = list(l = 100, r = 100, t = 60))
+
+
+```
+
+
+## Aktive Beteiligung auch bei Freitextfragen
+
+```{r}
+# Calculation of number of "Freitextantworten" (free text answers)
+
 freitext <- data %>%
   filter(str_detect(question_id, "^DSH6$|DSH7|SOL|SER|COM_1|COM_2")) %>%
   # Filter n. gestellt, n.geantwortet und Filtersprünge
@@ -131,31 +302,21 @@ freitext <- data %>%
     value = str_remove_all(value, "</?p>"),
     value = str_trim(value)
   ) %>%
-  # filter(!str_detect(value, "^nein$|^-$|^kein?$"))
   filter(!str_detect(value, regex("^nein.?$|^no$|^-$|^kein.{0,3}$|^nichts$|^.{1,3}$", ignore_case = TRUE)))
+
+nn_freitext <- freitext %>% distinct(data_id, .keep_all = TRUE) %>% pull(data_id)
 ```
 
-<font size="8"> `r nrow(freitext)`</font>
+Es wurden auf die vier reinen Freitextfragen **`r nrow(freitext)`** Antworten gegeben. Dies schließt ausschließlich inhaltliche Antworten ein, und berücksichtigt nicht die Angaben unter „Sonstiges“ bei anderen Fragen.[^interesse-fdm-3] Von 471 Teilnehmenden gaben insgesamt 239 und somit >50% Antworten auf Freitextfragen.
 
-beträgt die Anzahl[^interesse-fdm-3] an genuinen Freitextantworten auf sechs verschiedene Freitextfragen.[^interesse-fdm-4]
+[^interesse-fdm-3]: Freitextantworten mit weniger als drei Zeichen (z.B. *ja*, *no*, -, .) sowie *nein*, *kein\**, *nichts* wurden aufgrund ihrer fehlenden Aussagekraft entfernt. Ebenfalls nicht berücksichtigt wurden hierbei Freitextfragen, die eine Ergänzung zu zuvor gegebenen Auswahlmöglichkeiten darstellen ("Sonstiges, und zwar ..."-Fragen sowie Fragen nach genutzten Dateiformaten und nach anderen Verbundförderungen).
 
-[^interesse-fdm-3]: Freitextantworten mit weniger als drei Zeichen (z.B. ja, no, -, .) sowie nein, kein\*, nichts wurden aufgrund ihrer fehlenden Aussagekraft entfernt.
 
-[^interesse-fdm-4]: Nicht berücksichtigt wurden hierbei Freitextfragen, die eine reine Ergänzung zu zuvor gegebenen Auswahlmöglichkeiten darstellen (Sonstiges, und zwar ...).
+## FDM ist fast allen schon begegnet
 
-Die genuinen Freitextfragen lauten:
+Nur 6,4% (30 von 471) der Teilnehmenden ist das Thema FDM bisher in keinem Kontext begegnet.
 
--   Welche Gründe sprechen aus Ihrer Sicht gegen das Teilen von Forschungsdaten? (DSH6)
--   Welche Gründe sprechen aus Ihrer Sicht gegen das Teilen von Forschungsdaten über Ihre gegenwärtige Data-Sharing Praxis hinaus? (DSH7)
--   Sind Ihnen zu den in der vorherigen Frage genannten Anwendungsbereichen Lösungen bekannt, die an der Charité jedoch nicht vorgehalten werden? (SOL)
--   Welche Dienste und Werkzeuge für das Forschungsdatenmanagement würden Sie darüber hinaus in einem übergreifenden Verbundkontext, wie ihn die BUA bietet, als relevant bzw. wünschenswert erachten? (SER)
--   Haben Sie weitere Kommentare oder Ergänzungen? (COM_1)
-
-## Kontakt zum Thema Forschungsdatenmanagement
-
-Nur 6,4% (30 von 471) der Befragten ist das Thema Forschungsdatenmanagement bisher in keinem Kontext begegnet.
-
-```{r demo-4, fig.cap="Kontakt zum Thena Forschungsdatenmanagement"}
+```{r}
 kontakt <- data %>%
   filter(str_detect(question_id, "^CON_10$")) %>%
   filter(value %in% c("0", "1")) %>%
@@ -168,6 +329,8 @@ kontakt <- data %>%
   ) %>%
   mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein"))) %>%
   arrange(perc)
+
+# Chart removed in favor of chart with status group selection
 
 # kontakt %>%
 #   plot_ly(
@@ -189,7 +352,7 @@ kontakt <- data %>%
 #   layout_mode_bar()
 ```
 
-```{r demo-3, fig.cap="Kontakt zum Thema Forschungsdatenmanagement"}
+```{r demo-kontakt, fig.cap="Anteil der Teilnehmenden, die bisher keinen Kontakt zum FDM hatten, getrennt nach beruflichem Status"}
 kontakt <- data %>%
   filter(str_detect(question_id, "^CON_10$")) %>%
   filter(value %in% c("0", "1")) %>%
@@ -232,7 +395,7 @@ sta_kon <- bind_rows(kon_alle, sta_kon) %>%
   arrange(perc)
 
 
-plot_ly(
+p <- plot_ly(
   # sort = FALSE,
   rotation = 90,
   textposition = "auto",
@@ -335,32 +498,113 @@ plot_ly(
       )
     )
   )) %>%
-  layout_title(text = "Mir ist das Thema Forschungsdatenmanagement bisher nicht begegnet!", margin = list(t = 100)) %>%
+  layout_title(text = "Mir ist das Thema Forschungsdatenmanagement bisher nicht begegnet", margin = list(t = 100)) %>%
   layout_caption(
     hovertext = str_wrap(
       "Unter Beruflicher Status Andere sind folgende Gruppen zusammengefasst: Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward), Technische*r Mitarbeiter*in sowie Andere.",
       100
     )
-  )
+  ) %>%
+  layout_mode_bar()
+
+p
 
 # Unsuccessful tests to include info button
 
-# %>%
-#   layout_mode_bar() %>%
-#   add_annotations(x = 0,
-#                   y = -0.1,
-#                   text = "Beruflicher Status",
-#                   font = list(color = "grey"),
-#                   hovertext = str_wrap("Unter Beruflicher Status Andere sind zusammengefasst folgende Gruppen: Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward), Technische*r Mitarbeiter*in sowie Andere.", 100),
-#                   hoverlabel = list(bgcolor = "white", font = list(color = "blue", size = 11)),
+# p %>%
+#   add_annotations(x = 1,
+#                   y = 0,
+#                   yshift = -20,
+#                   xshift = 0,
 #                   xref = "paper",
-#                   xanchor = "center",
 #                   yref = "paper",
-#                   showarrow = FALSE,
-#                   font = list(color = 'black',
-#                               size = 11))
+#                   xanchor = "right",
+#                   yanchor = "auto",
+#                   text = "Info",
+#                   font = list(color = "black", size = 11), # #F2F2F2
+#                   hovertext = str_wrap("Unter Beruflicher Status Andere sind zusammengefasst folgende Gruppen: Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward), Technische*r Mitarbeiter*in sowie Andere.", 100),
+#                   showarrow = FALSE) %>%
+#   layout(images = list(source = "https://images.plot.ly/language-icons/api-home/python-logo.png",
+#            xref = "paper",
+#            yref = "paper",
+#            x= 0,
+#            y= .05,
+#            xanchor = "right",
+#            yanchor = "auto",
+#            sizex = 0.1,
+#            sizey = 0.1,
+#            opacity = 1
+#       ))
+# 
+# 
+# ###
+# 
+# formate <- data %>%
+#   filter(str_detect(question_id, "^DATA_([1-9]|10)$")) %>%
+#   select(data_id, fct_levels, value) %>%
+#   group_by(fct_levels, value) %>%
+#   count() %>%
+#   filter(value != "-998") %>%
+#   group_by(fct_levels) %>%
+#   mutate(nn = sum(n)) %>%
+#   mutate(perc = n / nn) %>%
+#   ungroup() %>%
+#   mutate(fct_levels = str_wrap(fct_levels, 35)) %>%
+#   mutate(fct_levels = fct_reorder(fct_levels, perc, first, .desc = TRUE)) %>%
+#   mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein")))
+# 
+# f <- formate %>%
+#   plot_ly(
+#     x = ~perc,
+#     y = ~fct_levels,
+#     color = ~value,
+#     colors = col_lik[c(5, 1)], # col_2_cat,
+#     hoverinfo = "text",
+#     hovertext = ~ str_glue(
+#       "<b>{fct_levels}—{value}</b>
+#     {n} ({round(perc*100, 1)}%)"
+#     )
+#   ) %>%
+#   add_bars(
+#     text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+#     textposition = "inside",
+#     insidetextanchor = "middle",
+#     textangle = 0,
+#     textfont = list(color = "white", size = 11)
+#   ) %>%
+#   layout_bar_flip(barmode = "stack") %>%
+#   layout_title(text = "Welche Forschungsdatentypen und -formate generieren Sie\nbzw. sind Gegenstand Ihrer Forschung?") %>%
+#   layout_caption() %>%
+#   layout_mode_bar()
+# 
+# f %>%
+#   add_annotations(x = 0,
+#                   y = 1,
+#                   xshift = -70,
+#                   yshift = 70,
+#                   xref = "paper",
+#                   yref = "paper",
+#                   xanchor = "right",
+#                   yanchor = "auto",
+#                   text = "Info",
+#                   font = list(color = "black", size = 11), # #F2F2F2
+#                   hovertext = str_wrap("Unter Beruflicher Status Andere sind zusammengefasst folgende Gruppen: Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward), Technische*r Mitarbeiter*in sowie Andere.", 100),
+#                   showarrow = FALSE) %>%
+#   layout(images = list(source = "https://images.plot.ly/language-icons/api-home/python-logo.png",
+#            xref = "paper",
+#            yref = "paper",
+#            x= 0,
+#            y= 1,
+#            xshift = -70,
+#            yshift = 70,
+#            xanchor = "right",
+#            yanchor = "auto",
+#            sizex = 0.1,
+#            sizey = 0.1,
+#            opacity = 1
+#       ))
 
-
+####
 #
 # octocat <- list(
 #   name = str_wrap("Unter Beruflicher Status Andere sind zusammengefasst folgende Gruppen: Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward), Technische*r Mitarbeiter*in sowie Andere.",50),

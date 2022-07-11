@@ -13,6 +13,12 @@ pre code {
   white-space: inherit;
 }
 
+/*------------ TOC --------------*/
+
+.book .book-summary {
+  background: white;
+}
+
 /*-----Body Links-------*/
 
 .book .book-summary ul.summary li a, 
@@ -55,4 +61,24 @@ h1, h2, h3, h4 {
   font-family: 'Lora', arial, sans-serif;
 }
 */
+
+/*--- LOGO ---*/
+
+.toc-logo {
+  width: 250px !important;
+  object-fit: contain;
+  margin: 0 auto 0 0;
+  display: block;
+}
+
+.toc-logo img {
+  max-width: 100%;
+  margin-bottom: 0px;
+}
+
+.summary > li:first-child {
+  height: auto !important; 
+}
+
+
 

@@ -1,0 +1,1748 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Sandbox
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+```{r}
+# Export codebook for Angela (2022-06-28)
+# codebook <- data %>%
+#   filter(data_id == "1") %>%
+#   select(-data_id, -value, -fct_levels, -value_decoded)
+# 
+# library(openxlsx)
+# write.xlsx(codebook, file = "codebook_2022_06_28.xlsx")
+```
+
+## Kontakt zu FDM {#kontakt}
+
+
+### Teamleitung
+
+Für die Frage "In welchem Kontext sind sie bereits mit dem Thema FDM in Kontakt gekommen?" (CON_1 - CON_10) wurde gegenübergestellt, wie diese von TN mit und ohne Teamleitung beantwortet wurde. Die Auwahlmöglichkeiten "Mir ist das Thema Forschungsdatenmanagement bisher nicht begegnet" (CON_10) und "Sonstiges, und zwar:" (CON_11) wurden von der Analyse ausgeschlossen. 
+
+```{r}
+# Filter FDM Kontakt
+fdm_lead <- data %>%
+  filter(str_detect(question_id, "^CON_[1-9]$")) %>%
+  drop_na(value_decoded)
+
+# Filter LEAD == 1
+lead_1 <- data %>%
+  filter(question_id == "LEAD" & value == 1) %>% pull(data_id)
+
+# Filter LEAD == 0
+lead_0 <- data %>%
+  filter(question_id == "LEAD" & value == 0) %>% pull(data_id)
+
+# Create LEAD column
+fdm_lead_2 <- fdm_lead %>% 
+  select(data_id, question_id, value_decoded) %>% 
+  mutate(lead = case_when(data_id %in% lead_1 ~ "Ja",
+                          data_id %in% lead_0 ~ "Nein")) 
+
+# Create factors
+levels_fdm_lead <- fdm_lead_2 %>%
+  filter(lead == "Ja") %>%
+  group_by(value_decoded) %>%
+  count() %>%
+  arrange(-n) %>%
+  pull(value_decoded)
+
+fdm_lead_2 <- fdm_lead_2 %>%
+  mutate(value_decoded = factor(value_decoded, levels = levels_fdm_lead, labels = str_wrap(str_trunc(levels_fdm_lead, 80), 35))) %>%
+  mutate(lead = factor(lead, levels = c("Ja", "Nein")))  
+
+# Alternative to create factor column
+#  mutate(value_decoded = fct_reorder(factor(value_decoded), question_id, .fun = first)) 
+
+# Create percentage
+fdm_lead_3 <- fdm_lead_2 %>%
+  group_by(value_decoded, lead) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(perc = case_when(lead == "Ja" ~ n/length(lead_1),
+                          lead == "Nein" ~ n/length(lead_0))) %>%
+  mutate(lead_n = case_when(lead == "Ja" ~ paste0("Ja (n=", length(lead_1), ")"),
+                            lead == "Nein" ~ paste0("Nein (n=", length(lead_0), ")")))
+
+
+```
+
+```{r fdm-kontakt-lead, fig.cap="FDM und Teamleitung"}
+# Plot
+fdm_lead_3 %>%
+  plot_ly(
+    x = ~ perc,
+    y = ~ value_decoded,
+    color = ~ lead_n,
+    colors = col_2_cat
+  ) %>%
+  add_bars(
+    hoverinfo = "text",
+    hovertext = ~ str_glue(
+    "<b>Teamleitung—{lead}</b>
+    {value_decoded}
+    {n} ({round(perc*100, 1)}%)"),
+    text = ~ paste0(n, " (", round(perc * 100, 0), "%)"),
+    textfont = list(color = "black", size = 10)
+  ) %>%
+  layout_bar_flip_group(title = "In welchem Kontext sind sie bereits mit dem Thema\nForschungsdatenmanagement in Kontakt gekommen?") %>%
+  layout(legend=list(title=list(text="Teamleitung")))
+  
+  # layout(title = "Kontakt Thema FDM",
+  #        xaxis = list(title = FALSE, tickformat = ".0%", range = c(0,1)),
+  #        yaxis = list(title = FALSE, autorange = "reversed"),
+  #        legend=list(title=list(text="Teamleitung")))
+```
+Die Analyse zeigt, dass TN mit Teamleitung bei fast allen abgefragten Kontexten häufiger mit dem Thema FDM in Kontakt gekommen sind als TN ohne Teamleitung. Lediglich bei dem Kontext "Lehrveranstaltungen (Studium/Promotion)" gaben TN ohne Teamleitung häufiger an als TN mit Teamleitung, dass sie häufiger mit dem Thema FDM in Kontakt gekommen seien.
+
+In einer weiteren Analye wurden die Unterschiede zwischen TN mit und ohne Teamleitung für jeden Kontext normalisiert. Hierdurch wird deutch, dass TN mit Teamleitung 192% häufiger mit der Nationalen Forschungsdateninfrastruktur (NFDI) in Kontakt gekommen sind als TN ohne Teamleitung.
+
+```{r fdm-kontakt-diff, fig.cap='FDM Kontakt Diff'}
+# Create column with differences
+fdm_lead_diff <- fdm_lead_3 %>%
+  select(-lead_n) %>%
+  pivot_wider(names_from = lead, values_from = c(perc, n)) %>%
+  mutate(Diff = (perc_Ja/perc_Nein)-1)
+
+# Plot differences
+fdm_lead_diff  %>%
+  plot_ly(x = ~Diff, y = ~reorder(value_decoded, Diff)) %>%
+  add_lines(showlegend = FALSE, color = I(col_2_cat[2])) %>%
+  add_markers(color = I(col_2_cat[1])) %>%
+  layout(title = "Unterschiede zw. TN mit Teamleitung und ohne",
+         xaxis = list(title = "Differenz", tickformat = ".0%", range = c(-1,max(fdm_lead_diff$Diff)+0.1)),
+         yaxis = list(title = FALSE))
+```
+
+
+```{r fdm-kontakt}
+# Create table
+fdm_lead_diff %>%
+  mutate(across(where(is.numeric), ~ round(., 2))) %>%
+  rename(`FDM-Kontakt` = value_decoded) %>%
+  relocate(1, 4, 2, 5, 3, 6) %>%
+  kbl(caption = "FDM Kontakt") %>%
+  kable_styling(font_size = 11) %>%
+  add_header_above(c(" " = 1, "Teamleitung Ja" = 2, "Teamleitung Nein" = 2, " " = 1))
+```
+
+
+
+### Software/Code Eigennutzung
+
+Für die Frage "In welchem Kontext sind sie bereits mit dem Thema FDM in Kontakt gekommen?" (CON_1 - CON_10) wurde gegenübergestellt, wie diese von TN beantwortet, die Eigensoftware verwenden, im Gegensatz zu denen, die Eigensoftware nicht verwenden. 
+
+TN, die Eigensoftware verwenden, wurde definiert als TN, die auf die Frage "Mit welcher Software analysieren Sie Forschungsdaten?" (RDS_1 bis RDS_6) mit "Selbst geschriebene Codes" geantwortet haben oder auf die Frage "Welche Forschungsdatentypen und -formate generieren Sie bzw. sind Gegenstand Ihrer Forschung?" (DATA_1 bis DATA_13) mit "Selbstentwickelte oder weiterentwickelte Software" geantwortet haben.
+
+
+```{r}
+# Get data IDs with Software/Code Eigennutzung
+rds_3_data_10 <- data %>%
+  drop_na(value_decoded) %>%
+  filter(str_detect(question_id, "RDS_3|DATA_10")) %>%
+  pull(data_id) %>% unique
+
+# Get data with FDM-Kontakt and create Eigennutzung Column
+fdm_software <- data %>%
+  drop_na(value_decoded) %>%
+  filter(str_detect(question_id, "^CON_[1-9]$")) %>%
+  select(data_id, question_id, value_decoded) %>%
+  mutate(Eigennutzung = case_when(data_id %in% rds_3_data_10 ~ "Ja",
+                                  TRUE ~ "Nein")) 
+
+# Count Eigennutzung
+fdm_software_count <- fdm_software %>%
+  distinct(data_id, .keep_all = TRUE) %>%
+  group_by(Eigennutzung) %>%
+  count
+
+# fdm_software_count[[2]][[1]]
+# fdm_software_count[[2]][[2]]
+
+# Create perc columns
+fdm_software_2 <- fdm_software %>%
+  group_by(question_id, value_decoded, Eigennutzung) %>%
+  count() %>%
+  mutate(perc = case_when(Eigennutzung == "Ja" ~ n/fdm_software_count[[2]][[1]],
+                          Eigennutzung == "Nein" ~ n/fdm_software_count[[2]][[2]])) %>%
+  ungroup
+
+# Create level for factor
+levels <- fdm_software_2 %>%
+  filter(Eigennutzung == "Ja") %>%
+  arrange(-n) %>%
+  pull(value_decoded)
+
+# Create factor
+fdm_software_2 <- fdm_software_2 %>%
+  mutate(value_decoded = factor(value_decoded, levels = levels, labels = str_wrap(str_trunc(levels, 80), 35)))
+
+# Plot
+fdm_software_2 %>%
+  plot_ly(x = ~perc, y = ~value_decoded, color = ~Eigennutzung, colors = col_2_cat) %>%
+  add_bars(
+    hoverinfo = "text",
+    hovertext = ~ str_glue(
+    "<b>Eigene Software—{Eigennutzung}</b>
+    {value_decoded}
+    {n} ({round(perc*100, 1)}%)"),
+    text = ~ paste0(n, " (", round(perc * 100, 0), "%)"),
+    textfont = list(color = "black", size = 10)
+  ) %>%
+  layout_bar_flip_group(title = "In welchem Kontext sind sie bereits mit dem Thema\nForschungsdatenmanagement in Kontakt gekommen?") %>%
+  layout(legend=list(title=list(text="Eigene Software")))
+
+# Create difference
+fdm_software_3 <- fdm_software_2 %>%
+  select(value_decoded, Eigennutzung, perc) %>%
+  pivot_wider(names_from = Eigennutzung, values_from = perc) %>%
+  mutate(Diff = (Ja/Nein)-1)
+
+```
+
+TN, die Eigensoftware verwenden, sind in den meisten Kontexten häufiger mit dem Thema FDM in Kontakt gekommen, als TN, die keine Eigensoftware verwenden.
+
+
+```{r fdm-kontakt-eigensoftware, fig.cap='FDM Kontakt Eigensoftware'}
+# Plot difference
+fdm_software_3 %>%
+  plot_ly(x = ~Diff, y = ~reorder(value_decoded, Diff)) %>%
+  add_lines(showlegend = FALSE, color = I(col_2_cat[2])) %>%
+  add_markers(color = I(col_2_cat[1])) %>%
+  layout(title = "Unterschiede zw. TN, die eigene Software nutzen bzw. nicht nutzen",
+         xaxis = list(title = "Differenz", tickformat = ".0%", range = c(-1,max(fdm_software_3$Diff)+0.1)),
+         yaxis = list(title = FALSE))
+  
+```
+
+Wie bei Figure \@ref(fig:fdm-kontakt-diff) sind TN, die Eigensoftware verwenden, deutlich häufiger mit der Nationalen Forschungsdateninfrastruktur (NFDI) in Kontakt gekommen als TN, die keine Eigensoftware verwenden.
+
+TN, die über NFDI mit FDM in Kontakt gekommen sind (n = 32), nutzen 120% **häufiger** eigene Software, als solche TN, die nicht über NFDI mit FDM in Kontakt gekommen sind.
+
+TN, die über Informationskanälen der Charité mit FDM in Kontakt gekommen sind (n = 66), nutzen 15% **seltener** eigene Software, als solche TN, die nicht über Informationskanälen der Charité mit FDM in Kontakt gekommen sind.
+
+TN, die über die eigene Forschungspraxis mit FDM in Kontakt gekommen sind (n = 349), nutzen 9% **häufiger** eigene Software, als solche TN, die nicht über die eigene Forschungspraxis mit FDM in Kontakt gekommen sind.
+
+
+
+## Forschungspraktiken {#praktiken}
+
+
+### Teamleitung
+
+Zu Frage 5.0.1.2. [Welche der folgenden Forschungspraktiken treffen auf Sie zu?] wie bei (2.) Gegenüberstellung je nach Teamleitung; 
+
+```{r}
+lead <- data %>%
+  filter(question_id == "LEAD" & value == "1")
+
+lead_0 <- data %>%
+  filter(question_id == "LEAD" & value == "0")
+
+pra <- data %>%
+  filter(str_detect(question_id, "^PRA_[1-7$]"))
+
+test <- pra %>% 
+  select(data_id, question_id, value) %>%
+  mutate(lead = case_when(data_id %in% lead$data_id ~ "Ja",
+                          data_id %in% lead_0$data_id ~ "Nein",
+                          TRUE ~ as.character(NA))) %>%
+  group_by(question_id, lead) %>%
+  summarise(count = n(),
+            n = sum(as.numeric(value))) %>%
+  mutate(perc = n/count)
+
+
+levels <- test %>%
+  distinct(question_id) %>%
+  arrange %>% pull
+
+labels = c("Datenerhebung", "Datenanalyse", "Sekundärnutzung von Daten", "Datenaufbereitung für Dritte", "Teilen von Daten", "Datenveröffentlichung", "Publikation/Kommunikation")
+
+test <- test %>% 
+  mutate(value_decoded = factor(question_id, levels = levels, labels = labels))
+```
+
+
+```{r forschungspraktiken-1, fig.cap='Forschungspraktiken und Teamleitung'}
+test %>%
+  plot_ly(x = ~reorder(value_decoded, -perc, FUN = min), y = ~perc, color = ~lead, colors = col_2_cat) %>%
+  add_bars() %>%
+  layout(title = "Praktiken und Lead",
+         legend=list(title=list(text="Teamleitung")),
+         xaxis = list(title = "Forschungspraktiken"))
+```
+
+
+```{r}
+test %>%
+  ungroup() %>%
+  select(-question_id, -count) %>%
+  mutate(perc = paste(round(perc, 2)*100, "%")) %>%
+  pivot_wider(names_from = lead, values_from = c(n, perc)) %>%
+  relocate(1, 2, 4, 3, 5) %>%
+  kbl(caption = "Forschungspraktiken") %>%
+  kable_styling(font_size = 11) %>%
+  add_header_above(c(" " = 1, "Teamleitung" = 4))
+
+# library(formattable)
+# 
+# test %>%
+#   ungroup() %>%
+#   select(-question_id, -count) %>%
+#   mutate(perc = round(perc, 2)) %>%
+#   pivot_wider(names_from = lead, values_from = c(n, perc)) %>%
+#   relocate(1, 2, 4, 3, 5) %>%
+#   formattable(align = c("l", "l", "l", "l", "l"), list(perc_Ja = color_bar("#ff7f7f"), perc_Nein = color_bar("#ff7f7f")))
+
+
+```
+
+
+
+### Datenveröffentlichung 
+#### Workshops oder Veranstaltungen
+
+Zu Frage 5.0.1.2. [Welche der folgenden Forschungspraktiken treffen auf Sie zu?] Wie ist Antwort „Datenveröffentlichung“ aufgeteilt zwischen Leuten die in 5.0.1.1. „Workshops oder Veranstaltungen“ angegeben haben und denjenigen, die des nicht angegeben haben?
+
+```{r}
+ird <- data %>%
+  filter(question_id == "PRA_6" | question_id == "CON_7") %>%
+  select(data_id, question_id, value) %>%
+  pivot_wider(names_from = question_id, values_from = value) %>%
+  group_by(CON_7, PRA_6) %>%
+  count() %>%
+  group_by(CON_7) %>%
+  mutate(perc = n/sum(n)) %>%
+  mutate(CON_7 = factor(CON_7, levels = c(1, 0), labels = c("Ja", "Nein"))) %>%
+  mutate(PRA_6 = factor(PRA_6, levels = c(1, 0), labels = c("Datenveröffentlichung ja", "Datenveröffentlichung nein"))) %>%
+  ungroup()
+
+# Plot percentage
+# ird %>%
+#   plot_ly(x = ~CON_7, y = ~perc, color = ~PRA_6, colors = "Pastel1") %>%
+#   add_bars() %>%
+#   layout(barmode = 'stack', title = "Praktiken Datenveröffentlichung und Workshops (in %)")
+
+# Plot absolute numbers
+```
+
+
+```{r forschungspraktiken-3, fig.cap='Datenveröff. und Workshops'}
+ird %>%
+  plot_ly(x = ~CON_7, y = ~n, color = ~PRA_6, colors = col_2_cat) %>%
+  add_bars() %>%
+  layout(title = "Praktiken Datenveröffentlichung und Workshops (absolute Zahlen)",
+         xaxis = list(title = "Workshops oder Veranstaltungen"))
+```
+
+
+#### Services und Infrastruktur
+
+Zu Frage 5.0.1.2. [Welche der folgenden Forschungspraktiken treffen auf Sie zu?] Wie ist Antwort „Datenveröffentlichung“ aufgeteilt zwischen Leuten die in 5.0.1.1. „Services und Infrastruktur“ der Charité angegeben haben und denjenigen, die des nicht angegeben haben? 
+
+```{r}
+ird <- data %>%
+  filter(question_id == "PRA_6" | question_id == "CON_9") %>%
+  select(data_id, question_id, value) %>%
+  pivot_wider(names_from = question_id, values_from = value) %>%
+  group_by(CON_9, PRA_6) %>%
+  count() %>%
+  group_by(CON_9) %>%
+  mutate(perc = n/sum(n)) %>%
+  mutate(CON_9 = factor(CON_9, levels = c(1, 0), labels = c("Ja", "Nein"))) %>%
+  mutate(PRA_6 = factor(PRA_6, levels = c(1, 0), labels = c("Datenveröffentlichung ja", "Datenveröffentlichung nein"))) %>%
+  ungroup()
+
+# # Plot percentage
+# ird %>%
+#   plot_ly(x = ~CON_9, y = ~perc, color = ~PRA_6, colors = "Pastel1") %>%
+#   add_bars() %>%
+#   layout(barmode = 'stack', title = "Praktiken Datenveröffentlichung und Services (in %)")
+```
+
+
+```{r forschungspraktiken-4, fig.cap='Datenveröff. und Services'}
+# Plot absolute numbers
+ird %>%
+  plot_ly(x = ~CON_9, y = ~n, color = ~PRA_6, colors = col_2_cat) %>%
+  add_bars() %>%
+  layout(title = "Praktiken Datenveröffentlichung und Services (absolute Zahlen)",
+         xaxis = list(title = "Nutzung Services / Infrastruktur der Charité"))
+```
+
+
+
+
+
+
+
+## Status
+
+```{r demo-1, fig.cap="Beruflicher Status"}
+levels <- c("Professor*in", "Doktorand*in", "Wissenschaftliche*r Mitarbeiter*in", "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)", "Technische*r Mitarbeiter*in", "Andere")
+
+labels <- levels %>% str_trunc(40) %>% str_wrap(30)
+
+sta <- data %>%
+  filter(str_detect(question_id, "^STA$")) %>%
+  group_by(value_decoded) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(nn = sum(n),
+         perc = n/sum(n)) %>%
+  mutate(value_decoded = factor(value_decoded, 
+                                levels = levels,
+                                labels = labels)) %>%
+  mutate(value_decoded = fct_reorder(value_decoded, perc, .desc = TRUE)) %>%
+  arrange(-perc)
+
+col <- c(col_cat, " #a675d7")
+
+
+sta %>% plot_ly(
+  labels = ~ value_decoded,
+  values = ~ n,
+  textposition = "auto",
+  texttemplate = ~str_glue("{value_decoded}
+    {round(perc*100, 1)}% (n={n})"),
+  showlegend = FALSE,
+  marker = list(colors = col,
+                line = list(col = "#FFFFFF", width = 1)),
+  type = "pie",
+  pull = c(0, 0, 0.1, 0, 0, 0),
+  direction = "clockwise",
+  automargin = TRUE
+) %>%
+  layout(
+    margin = list(t = 50),
+    title = list(
+      text = paste0("<b>Was ist Ihr beruflicher Status?
+</b>"),
+font = list(size = 15),
+x = 0.5,
+y = 0.95,
+xref = "paper",
+yref = "container"
+    )
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+>"Super, dass FDM mehr berücksichtigt wird" --- (aus: Haben Sie weitere Kommentare oder Ergänzungen?)
+
+>"Danke für das wichtige Thema" --- (aus: Haben Sie weitere Kommentare oder Ergänzungen?)
+
+
+
+
+```{r demo-3, fig.cap="Personenbegzogene Daten"}
+ird <- data %>%
+  filter(str_detect(question_id, "^IRD$")) %>%
+  filter(value %in% c("0", "1", "2")) %>%
+  group_by(value_decoded) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(nn = sum(n),
+         perc = n/sum(n)) %>%
+  arrange(-perc)
+
+ird %>% plot_ly(
+  labels = ~ value_decoded,
+  values = ~ n,
+  textposition = "auto",
+  texttemplate = ~str_glue("{value_decoded}
+    {round(perc*100, 1)}% (n={n})"),
+  showlegend = FALSE,
+  marker = list(colors = col_cat,
+                line = list(col = "#FFFFFF", width = 1)),
+  type = "pie"
+) %>%
+  layout(
+    margin = list(t = 50),
+    title = list(
+      text = paste0("<b>Arbeiten Sie mit personenbezogenen Daten?</b>"),
+font = list(size = 15),
+x = 0.5,
+y = 0.95,
+xref = "paper",
+yref = "container"
+    )
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+### Teamleitung
+
+und insg. 171 Teamleitungen 
+
+```{r demo-2, fig.cap="Teamleitung"}
+lead <- data %>%
+  filter(str_detect(question_id, "^LEAD$")) %>%
+  filter(value %in% c("0", "1")) %>%
+  group_by(value_decoded) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(nn = sum(n),
+         perc = n/sum(n)) %>%
+  arrange(perc)
+
+lead %>% plot_ly(
+  labels = ~ value_decoded,
+  values = ~ n,
+  sort = FALSE,
+  pull = c(0.1, 0),
+  textposition = "auto",
+  texttemplate = ~str_glue("{value_decoded}
+    {round(perc*100, 1)}% (n={n})"),
+  showlegend = FALSE,
+  marker = list(colors = col_cat,
+                line = list(col = "#FFFFFF", width = 1)),
+  type = "pie"
+) %>%
+  layout_title(text = "Leiten Sie ein Team?")%>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+### Beruflicher Status und Teamleitung (alternative Darstellung)
+
+[Anm JT: In dieser Darstellung werden zwei Charts in einem Plot-Container angezeigt. Hierduch werden zwei Charts in direkten Zusammenhang gebracht und es wird Platz gespart. Durch die Pull-Funktionen können einzelne Pie-Stücke (Professor\*in bzw. Teamleitung Ja) hervorgehoben werden.]
+
+Insgesamt haben 471 Teilnehmer\*innen den Fragebogen komplett ausgefüllt. Hiervon gaben 12,1% (57 von 471) an, den beruflichen Status Professor\*in zu haben. 
+
+Von den Befragten leiten 36,3% (171 von 471) ein Team.
+
+```{r demo-4, fig.cap="Beruflicher Status und Teamleitung"}
+
+fig <- plot_ly() %>%
+  add_pie(
+  data = sta,
+  labels = ~ value_decoded,
+  values = ~ n,
+  textposition = "inside",
+  texttemplate = ~str_glue("{value_decoded}
+    {round(perc*100, 1)}% (n={n})"),
+  showlegend = FALSE,
+  automargin = TRUE,
+  direction = "clockwise",
+  pull = c(0, 0, 0.1, 0, 0, 0),
+  marker = list(colors = col,
+                line = list(col = "#FFFFFF", width = 1)),
+  domain = list(x = c(0, 0.5), y = c(0, 1))) %>%
+  layout(uniformtext=list(minsize=11, mode='hide')) 
+
+  
+fig <- fig %>% 
+  add_pie(
+    data = lead,
+  labels = ~ value_decoded,
+  values = ~ n,
+  sort = FALSE,
+  textposition = "auto",
+  texttemplate = ~str_glue("{value_decoded}
+    {round(perc*100, 1)}% (n={n})"),
+  showlegend = FALSE,
+  direction = "clockwise",
+  pull = c(0.1, 0),
+  marker = list(colors = col_cat,
+                line = list(col = "#FFFFFF", width = 1)),
+  domain = list(x = c(0.5, 1), y = c(0, 1))) 
+
+fig %>%
+  layout_caption() %>%
+  layout_mode_bar %>%
+  add_annotations(
+    x = 0.25,
+    y = 1,
+    text = "<b>Was ist Ihr beruflicher Status?</b>",
+    align = "left",
+    showarrow = FALSE,
+    xref = 'paper',
+    yref = 'paper',
+    xanchor = 'center',
+    yanchor = 'auto',
+    xshift = 0,
+    yshift = 0,
+    font = list(size = 15)
+  ) %>%
+  add_annotations(
+    x = 0.75,
+    y = 1,
+    text = "<b>Leiten Sie ein Team?</b>",
+    align = "left",
+    showarrow = FALSE,
+    xref = 'paper',
+    yref = 'paper',
+    xanchor = 'center',
+    yanchor = 'auto',
+    xshift = 0,
+    yshift = 0,
+    font = list(size = 15)
+  )
+  
+```
+
+
+
+## Forschungsdatentypen und -formate
+
+Praktiken, Bedarfe und Meinungen sind höchst heterogen, so dass das FDM insg. Auch sehr vielfältig und fachspezifisch sein muss: 
+
+Riesige Diversität u.a. der Plattformen und Dateiformate (u.a. 5.0.1.4)
+
+Frage JT: Was soll hier geschehen mit den Freitextfeldern "Gerätespezifische Daten in proprietären Dateiformaten" und "Gerätespezifische Daten in freien Dateiformaten"? Sollen diese in die Analyse integriert werden?
+
+
+```{r fdm-typen-formate-1, fig.cap="Forschungsdatentypen und -formate"}
+# Welche Forschungsdatentypen und -formate generieren Sie bzw. sind Gegenstand Ihrer Forschung?
+
+formate <- data %>%
+  filter(str_detect(question_id, "^DATA_([1-9]|10)$")) %>%
+  select(data_id, fct_levels, value) %>%
+  group_by(fct_levels, value) %>%
+  count() %>%
+  filter(value != "-998") %>%
+  group_by(fct_levels) %>%
+  mutate(nn = sum(n)) %>%
+  mutate(perc = n/nn) %>%
+  ungroup() %>%
+  mutate(fct_levels = str_wrap(fct_levels, 35)) %>%
+  mutate(fct_levels = fct_reorder(fct_levels, perc, first, .desc = TRUE)) %>%
+  mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein")))
+
+formate %>%
+  plot_ly(
+    x = ~ perc,
+    y = ~ fct_levels,
+    color = ~ value,
+    colors = col_cat[c(1,2)], #col_2_cat,
+    hoverinfo = "text",
+    hovertext = ~ str_glue(
+    "<b>{fct_levels}—{value}</b>
+    {n} ({round(perc*100, 1)}%)")
+  ) %>%
+  add_bars(
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = 'inside',
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11)) %>%
+  layout_bar_flip_stack(title = "Welche Forschungsdatentypen und -formate generieren Sie\nbzw. sind Gegenstand Ihrer Forschung?") %>%
+  layout(annotations =
+             list(x = 1, y = -0.1, text = ~glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
+                        nn = first(nn)),
+                  align = "left",
+                  showarrow = F, xref='paper', yref='paper',
+                  xanchor='auto', yanchor='auto', xshift=0, yshift=0,
+                  font=list(size=11))) 
+
+
+```
+
+## Personenbezogene Daten
+
+### Beruflicher Status
+
+```{r fdm-pers-1, fig.cap="Personenbezogene Daten"}
+library(janitor)
+pers_sta <- data %>%
+  filter(str_detect(question_id, "^STA$|^IRD$")) %>%
+  select(data_id, question_id, value) %>%
+  pivot_wider(names_from = question_id, values_from = value) %>%
+  group_by(STA, IRD) %>%
+  count() %>%
+  filter(str_detect(IRD, "(-998|-999)", negate = TRUE)) %>%
+
+  group_by(IRD) %>%
+  group_modify(~ .x %>% adorn_totals("row", name = "0")) %>%
+  bind_rows() %>%
+  
+  ungroup() %>%
+  mutate(nn = sum(n)/2) %>%
+  
+  group_by(STA) %>%
+  mutate(perc = n/sum(n)) %>%
+  
+  mutate(n_group = sum(n)) %>%
+  
+  ungroup() %>%
+  mutate(STA = factor(STA, levels = as.character(0:6), 
+                      labels = 
+                        str_wrap(c("Alle", "Professor*in", "Doktorand*in", "Wissenschaftliche*r Mitarbeiter*in", "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)", "Technische*r Mitarbeiter*in", "Andere"), 30)
+                      )) %>%
+  
+  
+  
+  mutate(STA = paste0(STA, "\nn=", n_group)) %>%
+  
+  mutate(STA = fct_reorder(STA, perc, first, .desc = TRUE)) %>%
+  
+  mutate(STA = fct_relevel(STA, paste0("Alle\nn=", first(nn)), after = 6)) %>%
+  
+  
+  mutate(IRD = factor(IRD, levels = c("1", "0", "2"), labels = c("Ja", "Nein", "Ich weiß\nnicht")))
+  
+
+test <- pers_sta %>%  
+  ungroup() %>%
+  group_by(IRD) %>%
+  group_modify(~ .x %>% adorn_totals("row")) %>%
+  bind_rows()
+
+
+pers_sta %>%
+  plot_ly(
+    x = ~ perc,
+    y = ~ STA,
+    color = ~ IRD,
+    colors = col_cat[1:3],
+    hoverinfo = "text",
+    hovertext = ~ str_glue("<b>{STA}—{IRD}</b>
+    {n} ({round(perc*100, 1)}%)")
+  ) %>%
+  add_bars(
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = 'inside',
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11)
+  ) %>%
+  layout_bar_flip_stack(title = "Beruflicher Status\nund Arbeit mit personenbezogenen Daten") %>%
+  layout(
+    legend = list(title = list(
+      text = str_wrap("<b>Arbeiten Sie mit personenbez. Daten?</b>", 15),
+      font = list(size = 11)
+    )),
+    shapes = list(
+      type = "line",
+      x0 = -0.05,
+      x1 = 1,
+      xref = "paper",
+      y0 = 5.5,
+      y1 = 5.5,
+      line = list(color = "black", dash = "dot")
+    )
+  ) 
+  
+  
+```
+
+### Teilen von Daten
+
+```{r eval=FALSE, include=FALSE}
+
+teilen <- data %>%
+  group_by(data_id) %>%
+  filter(str_detect(question_id, "^DSH_[1-5]")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  group_by(question_id, value) %>%
+  count() %>%
+  group_by(question_id) %>%
+  mutate(nn = sum(n))
+  
+  
+  
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD" & value == "1") %>% nrow)
+
+
+teilen <- data %>%
+  filter(str_detect(question_id, "^DSH_[1-5]|^IRD$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  select(data_id, question_id, value) %>%
+  mutate(question_cat = str_extract(question_id, "[A-Z]{3}")) %>%
+  group_by(data_id) %>%
+  mutate(IRD = value[question_id == "IRD"])
+  
+  
+  
+
+  pivot_wider(names_from = question_cat, values_from = c(question_id, value))
+  
+  
+  group_by(question_id, value) %>%
+  count() %>%
+  group_by(question_id) %>%
+  mutate(nn = sum(n))
+
+
+
+teilen_1 <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "1")) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD" & value == "1") %>% nrow)
+
+teilen_1_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "1")) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+teilen_2 <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "2")) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD" & value == "2") %>% nrow)
+
+
+teilen_2_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "2")) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+teilen_0 <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "0")) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD" & value == "0") %>% nrow)
+
+
+teilen_0_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "0")) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+teilen_alle <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$"))) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD") %>% nrow)
+
+teilen_alle_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$"))) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+plot_ly(
+  x = ~ perc,
+  y = ~ value_decoded,
+  text = ~ paste0(round(perc * 100, 0), "%"),
+  textposition = 'auto',
+  insidetextanchor = "auto",
+  textangle = 0,
+  textfont = list(color = "black", size = 14)
+) %>%
+  add_trace(
+    data = teilen_1,
+    type = "bar",
+    name = paste0("Ja (n=", teilen_1_n, ")"),
+    marker = list(color = col_cat[1])
+  ) %>%
+  add_trace(
+    data = teilen_0,
+    type = "bar",
+    name = paste0("Nein (n=", teilen_0_n, ")"),
+    marker = list(color = col_cat[2])
+  ) %>%
+  add_trace(
+    data = teilen_2,
+    type = "bar",
+    name = paste0("Ich weiß nicht (n=", teilen_2_n, ")"),
+    marker = list(color = col_cat[3]),
+    visible = "legendonly"
+  ) %>%
+    add_trace(
+    data = teilen_alle,
+    type = "bar",
+    name = paste0("Alle (n=", teilen_alle_n, ")"),
+    marker = list(color = col_cat[5]),
+    visible = "legendonly"
+  ) %>%
+  layout(
+    title = glue::glue(
+      "Mit wem teilen Sie Forschungsdaten?"),
+xaxis = list(title = FALSE),
+yaxis = list(title = FALSE, tickformat = ".0%"),
+legend = list(traceorder = "normal", font = list(size = 10), title = list(text = "Arbeiten Sie mit\npersonenbezog. Daten?", font = list(size = 11))),
+uniformtext = list(minsize = 12, mode = "hide"),
+margin = list(t = 50)
+  )
+
+```
+
+### Dokumentation von FDM
+
+```{r}
+eln <- data %>%
+  filter(str_detect(question_id, "^DOC_[1-6]")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  # mutate(value = case_when(question_id == "DOC_8" ~ "1",
+  #                          TRUE ~ value)) %>%
+  #   mutate(fct_levels = case_when(question_id == "DOC_8" ~ "Sonstiges",
+  #                          TRUE ~ fct_levels)) %>%
+  select(data_id, fct_levels, value) %>%
+  mutate(value = as.numeric(value)) %>%
+  pivot_wider(names_from = fct_levels, values_from = value, values_fill = 0) %>%
+  select(-data_id) 
+
+eln_nn <- data %>%
+  filter(str_detect(question_id, "^DOC_[1-6]")) %>%
+  filter(value == "1") %>%
+  distinct(data_id) %>% nrow()
+ 
+
+
+#%>%
+ # relocate(Sonstiges, .before = `Nichts davon`)
+
+# Count number of unique rows
+# %>%
+#   group_by_all() %>% summarise(COUNT = n()) %>%
+#   ungroup()
+
+mat <- crossprod(as.matrix(eln[1:6])) %>% data.frame()
+#mat <- floor(t(mat * 100 / diag(mat)))  %>% data.frame()
+
+#mat_2 <- mat %>% mutate(across(everything(), ~ .x/466))
+
+mat_prop <- mat %>% mutate(across(everything(), ~ .x/max(.)))
+
+# Testing
+# library(openxlsx)
+# write.xlsx(eln, file = "werkzeuge.xlsx")
+# write.xlsx(mat, file = "werkzeuge_kreuztabelle.xlsx", rowNames = TRUE)
+# write.xlsx(mat_2, file = "werkzeuge_kreuztabelle_prop.xlsx", rowNames = TRUE)
+
+```
+
+Auf der X-Achse ist die unabhängige Variable, deren Ausprägung mit den abhängigen Variablen der Y-Achse erklärt werden.
+
+Lesebeispiel: Von allen Befragten, die mit SecuTrial arbeiten (n=43), nutzen 86% auch REDCap. Von allen Befragte, die mit REDCap arbeiten (n=144), nutzen 25,7% auch SecuTrial.
+
+Frage: Sollen Nichts davon und Sonstiges (Freitextantwort) auch angezeigt werden? Oder sollen sie anders sortiert werden, Sonstiges vor Nichts davon?
+
+```{r heatmap-1, fig.cap="Dokumentation FDM"}
+
+
+#mat_3 <- matrix(mat_2)
+#mat_abs <- matrix(mat)
+mat_prop_2 <- as.matrix(mat_prop)
+
+cats <- factor(c("Papier-Laborbuch\nn=153", "Elektronisches\nLaborbuch\nn=149", "REDCap\nn=144", "SecuTrial\nn=43", "PACS-System\nn=40", "GitHub\nn=103"), levels = c("Papier-Laborbuch\nn=153", "Elektronisches\nLaborbuch\nn=149", "REDCap\nn=144", "SecuTrial\nn=43", "PACS-System\nn=40", "GitHub\nn=103"))
+
+plot_ly(
+  x = cats,
+  y = cats,
+  z = mat_prop_2,
+  colors = rev(c(col_cat[c(1, 3)], "#FAF9F6")),
+  # #FAF9F6 == off-white
+  type = "heatmap",
+  showscale = FALSE
+) %>%
+  layout(
+    margin = list(t = 110),
+    title = list(
+      text = paste0(
+        "<b>Verwenden Sie eines der folgenden Werkzeuge,\num Forschungsdaten zu erfassen und/oder zu dokumentieren?
+</b>"
+      ),
+font = list(size = 15),
+x = 0,
+y = 0.95,
+xref = "paper",
+yref = "container"
+    ),
+yaxis = list(autorange = "reversed", tickfont = list(size = 11)),
+xaxis = list(side = "top", tickfont = list(size = 11)),
+annotations =
+  list(
+    x = 1,
+    y = -0.1,
+    text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
+                        nn = eln_nn),
+    align = "left",
+    showarrow = F,
+    xref = 'paper',
+    yref = 'paper',
+    xanchor = 'auto',
+    yanchor = 'auto',
+    xshift = 0,
+    yshift = 0,
+    font = list(size = 11)
+  )
+  ) %>%
+  add_annotations(
+    x = rep(0:5, each = 6),
+    y = rep(0:5, times = 6),
+    text = paste0(round(mat_prop_2 * 100, 1), "%") ,
+    xref = 'x',
+    yref = 'y',
+    showarrow = FALSE,
+    font = list(size = 11)
+  ) %>%
+  config(
+    displaylogo = FALSE,
+    modeBarButtonsToRemove = c(
+      "zoom",
+      "pan",
+      "select",
+      "lasso2d",
+      "zoomIn",
+      "zoomOut",
+      "autoScale",
+      "resetScale",
+      "toggleSpikelines",
+      "hoverClosestCartesian",
+      "hoverCompareCartesian"
+    ),
+    toImageButtonOptions = list(format = 'png',
+                                # one of png, svg, jpeg, webp
+                                scale = 3)
+  )
+
+```
+
+### Stärkster Anreiz
+
+```{r}
+# Was wäre für Sie der größte Anreiz, stärker in das Forschungsdatenmanagement zu investieren?
+
+
+anreize <- data %>%
+  filter(str_detect(question_id, "^ICT_1$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, value_decoded) %>%
+  group_by(value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  ungroup() %>%
+  mutate(nn = sum(n)) %>%
+  mutate(perc = n/nn) %>%
+ # mutate(value_decoded = str_trunc(value_decoded, 60)) %>%
+  mutate(value_decoded = str_wrap(value_decoded, 50)) %>%
+  mutate(value_decoded = fct_reorder(value_decoded, -n))
+
+anreize %>%
+  plot_ly(x = ~ perc,
+          y = ~ value_decoded) %>%
+  add_bars(
+    marker = list(color = col_2_cat[1]),
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = 'inside',
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 12)
+  ) %>%
+  layout_bar_flip_group(
+    title = "Was wäre für Sie der größte Anreiz,\nstärker in das Forschungsdatenmanagement zu investieren?",
+    xaxis = list(
+      title = FALSE,
+      tickformat = ".0%",
+      zeroline = TRUE,
+      dtick = 0.25,
+      tick0 = 0,
+      tickmode = "linear",
+      gridcolor = "black",
+      tickfont = list(size = 11)
+    ),
+    uniformtext = list(minsize = 12, mode = "hide")
+  ) %>%
+  layout_caption()
+
+# anreize %>%
+#   plot_ly(
+#     type = "pie",
+#     labels = ~ value_decoded,
+#     values = ~ n,
+#     showlegend = FALSE,
+#     direction = "clockwise",
+#     textposition = "auto",
+#     automargin = TRUE,
+#     texttemplate = ~str_glue("{value_decoded}
+#     {round(perc*100, 1)}% (n={n})"),
+#     textfont = list(size = 8),
+#     marker = list(colors = col,
+#                 line = list(col = "#FFFFFF", width = 1)),
+#     pull = c(0.1, 0, 0, 0, 0, 0, 0)) %>%
+#   layout(uniformtext=list(minsize=7, mode="hide")) 
+
+
+```
+
+## Förderstruktur {-}
+
+Da bei der Frage nach der Organisationseinheit bzw. Förderstruktur eine Mehrfach-Auswahl möglich ist, kann es zu Überschneidungen kommen. (Ein TN gehört sowohl einem Exzellenzcluster als auch einem EU-Verbundprojekt an.) Mit einem Venn-Diagramm werden die Überschneidungen der einzelnen Gruppen visualisiert.
+
+```{r}
+test <- data %>%
+  filter(str_detect(question_id, "^ORG_[1-9]")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  drop_na(value_decoded) %>%
+  mutate(value_grouped = case_when(
+    str_detect(question_id, "^ORG_[1235]") ~ "nationale Verbundprojekte",
+    str_detect(question_id, "^ORG_[46]") ~ "europäische Förderung",
+    str_detect(question_id, "^ORG_[7]") ~ "andere oder keine Förderstruktur",
+    str_detect(question_id, "^ORG_[89]") & str_detect(value, fixed("DFG", ignore_case = TRUE)) ~ "nationale Verbundprojekte",
+    TRUE ~ as.character(NA)
+  )) %>%
+  drop_na(value_grouped) %>%
+  distinct(question_id, .keep_all = TRUE) %>%
+  filter(question_type == "Mehrfach-Auswahl") %>%
+  arrange(question_id) %>%
+  select(question_id, value_decoded, value_grouped)
+```
+
+```{r eval=FALSE, include=FALSE}
+test %>%
+  kable(caption = "Gruppierung nach Organisationseinheit/Förderstruktur") %>%
+  kable_styling(full_width = TRUE, font_size = 11, position = "left")
+```
+
+
+
+
+```{r plotly-foerderstruktur, fig.cap='Förderstruktur'}
+# Filter data_ids with DFG
+filter_1 <- fdm_survey_data_complete_surveys %>%
+  filter(str_detect(question_id, "^ORG_[89]") & str_detect(value, fixed("DFG", ignore_case = TRUE))) %>%
+  distinct(data_id) %>%
+  pull()
+
+# Change ORG_7 to NA if DFG free text
+fdm_survey_data_complete_surveys$value_decoded[fdm_survey_data_complete_surveys$question_id == "ORG_7" & fdm_survey_data_complete_surveys$data_id %in% filter_1] <- NA
+
+# Group data
+test <- fdm_survey_data_complete_surveys %>%
+  filter(str_detect(question_id, "^ORG_[1-9]")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  drop_na(value_decoded) %>%
+  mutate(value_grouped = case_when(
+    str_detect(question_id, "^ORG_[1235]") ~ "nationale Verbundprojekte",
+    str_detect(question_id, "^ORG_[46]") ~ "europäische Förderung",
+    str_detect(question_id, "^ORG_[7]") ~ "andere oder keine Förderstruktur",
+    str_detect(question_id, "^ORG_[89]") & str_detect(value, fixed("DFG", ignore_case = TRUE)) ~ "nationale Verbundprojekte",
+    TRUE ~ as.character(NA)
+  )) %>%
+  drop_na(value_grouped)
+
+# Create venn diagram
+nat <- test$data_id[test$value_grouped == "nationale Verbundprojekte"]
+eu <- test$data_id[test$value_grouped == "europäische Förderung"]
+sonst <- test$data_id[test$value_grouped == "andere oder keine Förderstruktur"]
+
+x <- list(`nationale Verbundprojekte` = nat, `europ. Förderung` = eu, `andere oder keine Förderstruktur` = sonst)
+library(ggvenn)
+
+p <- ggvenn(
+  x,
+  fill_color = c("#367BBA", "#D873AB", "#A6A6A6"),
+  stroke_size = 0.5, set_name_size = 3
+)
+
+noax <- list(
+  title = "",
+  zeroline = FALSE,
+  showline = FALSE,
+  showticklabels = FALSE,
+  showgrid = FALSE
+)
+
+ggplotly(p) %>%
+  layout_title(text = "Overlap Förderung", margin = list(t = 50, b = 40)) %>%
+  layout_caption(nn = 471) %>%
+  layout_mode_bar() %>%
+  layout(
+    xaxis = noax,
+    yaxis = noax,
+    showlegend = FALSE
+  )
+```
+
+35 (7,9%) derjenigen, die die Frage nach der Organisationseinheit/Förderstruktur beantwortet haben, gehören sowohl einem "nationalen Verbundprojekt" als auch einem Projekt mit "europäischer Förderung" an.
+
+
+## Teilen von Forschungsdaten
+
+
+
+```{r}
+software3 <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "1")) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem")))
+
+n_pers <- software3 %>% distinct(data_id) %>% count() %>% pull
+
+test <- software3 %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/n_pers)
+```
+
+
+```{r teilen-1, fig.cap='Teilen von Forschunsgdaten'}
+test %>% plot_ly(y = ~ perc,
+                 x = ~ value_decoded,
+                 colors = col_cat) %>%
+  add_bars(
+    colors = col_cat,
+    text = ~ paste0(round(perc * 100, 0), "%"),
+    textposition = 'auto',
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "black", size = 14)
+  ) %>%
+  layout(
+    title = glue::glue(
+      "Mit wem teilen Sie Forschungsdaten?
+<span style='font-size:10pt'>nur Teilnehmende, die mit personenbezogenen Daten arbeiten, n = {n}</span>",
+n = software3 %>% distinct(data_id) %>% count()
+    ),
+xaxis = list(title = FALSE),
+yaxis = list(title = FALSE, tickformat = ".0%"),
+legend = list(orientation = 'h', traceorder = "normal"),
+uniformtext = list(minsize = 12, mode = "hide"),
+margin = list(t = 50)
+  )
+```
+
+
+```{r}
+teilen_1 <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "1")) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD" & value == "1") %>% nrow)
+
+teilen_1_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "1")) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+teilen_2 <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "2")) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD" & value == "2") %>% nrow)
+
+
+teilen_2_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "2")) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+teilen_0 <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "0")) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD" & value == "0") %>% nrow)
+
+
+teilen_0_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$") & value == "0")) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+teilen_alle <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$"))) %>%
+  ungroup() %>%
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Teammitglieder", "Mitglieder der Charité", "Externe Partner", "Allen Forschenden und/oder der Öffentlichkeit", "Niemandem"))) %>%
+  group_by(label, value_decoded) %>%
+  count() %>%
+  drop_na(value_decoded) %>%
+  group_by(label) %>%
+  mutate(perc = n/data %>% filter(question_id == "IRD") %>% nrow)
+
+teilen_alle_n <- data %>%
+  group_by(data_id) %>%
+  filter(any(str_detect(question_id, "^IRD$"))) %>%
+  ungroup() %>% 
+  filter(str_detect(question_id, "^DSH_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  distinct(data_id) %>% count() %>% pull
+
+plot_ly(
+  x = ~ value_decoded,
+  y = ~ perc,
+  text = ~ paste0(round(perc * 100, 0), "%"),
+  textposition = 'auto',
+  insidetextanchor = "auto",
+  textangle = 0,
+  textfont = list(color = "black", size = 14)
+) %>%
+  add_trace(
+    data = teilen_1,
+    type = "bar",
+    name = paste0("Ja (n=", teilen_1_n, ")"),
+    marker = list(color = col_cat[1])
+  ) %>%
+  add_trace(
+    data = teilen_0,
+    type = "bar",
+    name = paste0("Nein (n=", teilen_0_n, ")"),
+    marker = list(color = col_cat[2])
+  ) %>%
+  add_trace(
+    data = teilen_2,
+    type = "bar",
+    name = paste0("Ich weiß nicht (n=", teilen_2_n, ")"),
+    marker = list(color = col_cat[3]),
+    visible = "legendonly"
+  ) %>%
+    add_trace(
+    data = teilen_alle,
+    type = "bar",
+    name = paste0("Alle (n=", teilen_alle_n, ")"),
+    marker = list(color = col_cat[5]),
+    visible = "legendonly"
+  ) %>%
+  layout(
+    title = glue::glue(
+      "Mit wem teilen Sie Forschungsdaten?"),
+xaxis = list(title = FALSE),
+yaxis = list(title = FALSE, tickformat = ".0%"),
+legend = list(traceorder = "normal", font = list(size = 10), title = list(text = "Arbeiten Sie mit\npersonenbezog. Daten?", font = list(size = 11))),
+uniformtext = list(minsize = 12, mode = "hide"),
+margin = list(t = 50)
+  )
+
+
+
+```
+
+```{r}
+
+
+teilen <- teilen_1 %>%
+  ungroup() %>%
+  select(value_decoded, perc) %>%
+  left_join(teilen_0 %>% ungroup() %>% select(value_decoded, perc), by = "value_decoded")
+
+plot_ly(
+  data = teilen,
+  x = ~ value_decoded,
+  y = ~ perc.x,
+  marker = list(color = col_cat[1])
+) %>%
+  add_bars(
+    text = ~ paste0(round(perc.x * 100, 0), "%"),
+    textposition = 'auto',
+    insidetextanchor = "auto",
+    textangle = 0,
+    textfont = list(color = "black", size = 14)
+  ) %>%
+  layout(title = "Test Dropdown",
+         updatemenus = list(list(
+           y = 1,
+           x = 1,
+           buttons = list(
+             list(
+               method = "restyle",
+               args = list("marker", list(color = col_cat[1])), # list(list("y", list(~ perc.x, ~ perc.y)), 
+               label = "Ich arbeite mit pers.bez. Daten"
+             ),
+             list(
+               method = "restyle",
+               args = list("marker", list(color = col_cat[2])),
+               label = "Ich arbeite nicht mit pers.bez. Daten"
+             )
+           )
+         )))
+
+# https://plotly.com/r/custom-buttons/#update-button
+```
+
+## Regelungen zum Datenmanagement im Team
+
+Teaminterne Regelungen zum Datenmanagement sind nicht durch fachliche Unterstützung durch Expert*innen zu Datenmanagement-Themen beeinflusst.
+```{r}
+# Haben häufiger Regelungen zum Datenmanagement in ihrem Team (5.0.1.14)
+support <- data %>%
+  filter(str_detect(question_id, "^SUP1$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, 
+         support = value_decoded)
+
+regelungen <- data %>%
+  filter(str_detect(question_id, "^REG1_1$")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, 
+         regelungen = value_decoded)
+
+sup_regelungen <- support %>%
+  full_join(regelungen, by = "data_id") %>%
+  drop_na() %>%
+  add_count(name = "nn") %>%
+  count(support, regelungen, nn) %>%
+  group_by(support) %>%
+  mutate(perc = n/sum(n),
+         n_group = sum(n),
+         rank = max(perc[regelungen == "stark beeinflusst"])) %>%
+  ungroup() %>%
+  mutate(support = paste0(support, "\nn=", n_group)) %>%
+  mutate(support = fct_reorder(support, rank),
+         regelungen = factor(regelungen, levels = c("stark beeinflusst", "2", "3", "4", "gar nicht beeinflusst", "nicht zutreffend")))
+
+
+sup_regelungen %>%
+  plot_ly(x = ~ perc,
+          y = ~ support,
+          color = ~ regelungen,
+          colors = col_lik[c(5, 4, 2, 1, 3)]) %>%
+  add_bars_text() %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Inwieweit ist FDM-Praxis durch Regelungen im Team beeinflusst" ) %>%
+  layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+
+### Heatmap Forschungsdatentypen und -formate
+
+```{r}
+typen <- data %>%
+  filter(str_detect(question_id, "^DATA_([1-9]|10)$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  select(data_id, fct_levels, value) %>%
+  mutate(value = as.numeric(value)) %>%
+  group_by(fct_levels) %>%
+  mutate(n = sum(value)) %>%
+  ungroup() %>%
+  arrange(-n) %>%
+  select(-n) %>%
+  pivot_wider(names_from = fct_levels, values_from = value, values_fill = 0) %>%
+  select(-data_id) 
+
+levels <- data %>%
+  filter(str_detect(question_id, "^DATA_([1-9]|10)$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  select(data_id, fct_levels, value) %>%
+  group_by(fct_levels) %>%
+  summarise(n = sum(as.numeric(value))) %>%
+  arrange(-n) %>%
+  mutate(fct_levels = str_replace_all(fct_levels, " / ", "/")) %>%
+#  mutate(fct_levels = str_trunc(fct_levels, 30)) %>%
+  mutate(levels = paste0(fct_levels, " n=", n)) %>%
+  pull(levels) %>% str_wrap(35)
+  
+mat <- crossprod(as.matrix(typen[1:10])) %>% data.frame()
+
+mat_prop <- mat %>% mutate(across(everything(), ~ .x/max(.)))
+
+```
+
+Auf der X-Achse ist die unabhängige Variable, deren Ausprägung mit den abhängigen Variablen der Y-Achse erklärt werden.
+
+Lesebeispiel: Von allen Befragten, die Tabellen generieren (n=425), generieren 3,1% auch Geo-Daten. Von allen Befragten, die Geo-Daten generieren (n=13), generieren 100% auch Tabellen.
+
+```{r heatmap-2, fig.cap="Forschungsdatentypen und -formate"}
+
+mat_prop_2 <- as.matrix(mat_prop)
+
+plot_ly(
+  x = levels,
+  y = levels,
+  z = mat_prop_2,
+  colors = rev(c(col_cat[c(1, 3)], "#FAF9F6")),
+  # #FAF9F6 == off-white
+  type = "heatmap",
+  showscale = FALSE
+) %>%
+  layout_bar_flip(
+yaxis = list(autorange = "reversed", tickfont = list(size = 9)),
+xaxis = list(side = "top", tickfont = list(size = 9))) %>%
+  layout_title(margin = list(t = 160),
+               text = "Welche Forschungsdatentypen und -formate generieren Sie\nbzw. sind Gegenstand Ihrer Forschung?") %>%
+  layout_caption(nn = nrow(typen)) %>%
+  layout_mode_bar() %>%
+  add_annotations(
+    x = rep(0:9, each = 10),
+    y = rep(0:9, times = 10),
+    text = paste0(round(mat_prop_2 * 100, 1), "%") ,
+    xref = 'x',
+    yref = 'y',
+    showarrow = FALSE,
+    font = list(size = 10)
+  )
+
+
+
+```
+
+
+```{r wordcloud-2, fig.cap="Technische Werkzeuge"}
+# Word Cloud
+tools <- data %>%
+  filter(str_detect(question_id, "^TOOL_.($|[0-6]$)")) %>%
+  filter(value != "-998") %>%
+  select(data_id, fct_levels, value_decoded) %>%
+  drop_na() %>%
+  group_by(fct_levels, value_decoded) %>%
+  count() %>%
+  # mutate(value_decoded = str_wrap(value_decoded, 30)) %>%
+  mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40)))
+
+set.seed(44)
+ggplot(tools, aes(label = value_decoded, size = n, color = n)) +
+  geom_text_wordcloud_area(eccentricity = 1) +
+  # geom_text_wordcloud() +
+  # scale_size_area(max_size = 10) +
+  scale_radius(range = c(1, 8), limits = c(0, NA)) +
+  theme_minimal() +
+  scale_color_gradient(low = col_lik[1], high = col_lik[5]) +
+  ggtitle("<b>Für welche Aufgaben des Forschungsdatenmanagements<br>fehlen Ihnen geeignete technische Werkzeuge?</b>") +
+  theme(
+    plot.title = element_markdown(family = "Arial", size = 10.5, hjust = 0.5),  
+    plot.background = element_rect(fill = "#F2F2F2", linetype = 0),
+    panel.border = element_blank(),
+    plot.margin = margin(0.4, 0, 0, 0, "cm")
+  )
+```
+
+Die Frage "Was wäre für Sie der größte Anreiz, stärker in das Forschungsdatenmanagement zu investieren?" (Einfach-Auswahl) wurde sehr unterschiedliche von Umfrageteilnehmenden mit und ohne Teamleitung beantwortet. Die Unterschiede in den Antworten dieser beiden Gruppen werden in der nächsten Analyse betont. Es wird jeweils der Unterschied zum Mittelwert abgebildet. 
+
+Umfrageteilnehmende mit Teamleitung geben so 31% häufiger als der Durchschnitt an, dass Personalressourcen für FDM-Aufgaben für sie der größte Anreiz wäre, stärker in das FDM zu investieren. Umfrageteilnehmende ohne Teamleitung wählten hingegen 18% seltener als der Durchschnitt Personalressourcen als den größten Anreiz aus. 
+
+Auch bei den anderen Antwortmöglichkeiten wurde ein deutlicher Unterschied zwischen den beiden Gruppen deutlich. Einzig bei der Antwortmöglichkeit "Förderung von FDM-Projekten in der Charité" zeigte sich kein deutlicher Unterschiedlich in der Bedeutung bei Befragten mit und ohne Teamleitung.
+
+Diese Analyse ist der Einschränkung unterworfen, dass durch die vorgegebene Einfach-Auswahl der Frage die Befragten eine eindeutige Präferenz angeben mussten und so teilweise nur kleine Beobachtungszahlen zu verzeichnen waren, beispielsweise bei der Antwortmöglichkeit Preise oder Berücksichtung des Engagements im FDM in Einstellungs-/Berufungsverfahren.
+
+```{r bedarfe-4, fig.cap='Größter Anreiz'}
+
+anreize <- data %>%
+  filter(str_detect(question_id, "^ICT_1$|LEAD")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, question_id, value_decoded) %>%
+  pivot_wider(names_from = question_id, values_from = c(value_decoded)) %>%
+  drop_na(ICT_1) %>%
+  # Summarise
+  group_by(LEAD, ICT_1) %>%
+  count() %>%
+  # Create totals
+  group_by(ICT_1) %>%
+  group_modify(~ .x %>% adorn_totals("row", name = "Alle")) %>%
+  group_by(LEAD) %>%
+  # N per group
+  mutate(nn = sum(n)) %>%
+  ungroup() %>%
+  # Perc
+  mutate(perc = n / nn) %>%
+  # Data preparation for plotting
+  mutate(ICT_1 = str_wrap(ICT_1, 50)) %>%
+  mutate(ICT_1 = fct_reorder(ICT_1, n, first, .desc = TRUE))
+
+test <- anreize %>%
+  group_by(ICT_1) %>%
+  mutate(perc_norm = perc / perc[LEAD == "Alle"] - 1) %>%
+  filter(LEAD %in% c("Ja", "Nein")) %>%
+  ungroup() %>%
+  mutate(ICT_1 = fct_reorder(ICT_1, perc_norm, first))
+
+test %>%
+  plot_ly(
+    x = ~perc_norm,
+    y = ~ICT_1,
+    color = ~LEAD,
+    colors = col_lik[c(5, 1)],
+    name = ~ paste0(LEAD, "\n(n=", nn, ")")
+  ) %>%
+  add_bars(
+    text = ~ glue::glue(
+      "{perc_norm}% ({n})",
+      perc_norm = round(perc_norm * 100),
+      n = n
+    ),
+    textfont = list(color = "white", size = 11),
+    insidetextanchor = "middle",
+    textangle = 0,
+    textposition = "inside",
+  ) %>%
+  layout_bar_flip(
+    barmode = "overlay",
+    legend_title = "Leiten Sie ein Team?",
+    range = NULL,
+    xaxis = list(
+      title = list(text = "Unterschied zum Durchschnitt in %", font = list(size = 12)),
+      tickformat = ".0%",
+      range = NULL,
+      zeroline = FALSE,
+      dtick = 0.25,
+      tick0 = 0,
+      tickmode = "linear",
+      gridcolor = "#A0A0A0",
+      tickfont = list(size = 10)
+    )
+  ) %>%
+  layout_title(
+    text = "Umfrageteilnehmende MIT und OHNE Teamleitung im Vergleich:\nWas wäre für Sie der größte Anreiz,\nstärker in das Forschungsdatenmanagement zu investieren?",
+    margin = list(t = 100, b = 60)
+  ) %>%
+  layout_mode_bar()
+```
+
+
+### Zitate
+
+>"Es ist wichtig, dass es einem das Arbeiten erleichtert und nicht erschwert durch zu viele Regelungen und Bürden/Hürden“ 
+--- (aus: Haben Sie weitere Kommentare oder Ergänzungen?) 
+
+>"Alle arbeiten schon genug. Forschungsdatenmanagement muss einfach implementierbar oder besser von Expertinnen übernommen werden. Alles andere ist mehr Arbeit, die dann noch oder nur durch Androhung von Strafen passiert.“ 
+--- (aus: Haben Sie weitere Kommentare oder Ergänzungen?) 
+
+>"Some of the available training is great, but it can only be general. There is a need for project-specific support and training on real cases.” 
+--- (aus: Haben Sie weitere Kommentare oder Ergänzungen?) 
+
+## Für FDM insgesamt und insbesondere IT-Aspekte des FDM werden viele konkrete Bedarfe geäußert
+
+Auf die Frage „Sind Ihnen […] Lösungen bekannt, die an der Charité jedoch nicht vorgehalten werden?“ hin wurden zahlreiche Bedarfe genannt. Diese geben konkrete Hinweise auf das, was auf- oder ausgebaut werden muss. Punktuell bestehen Dienste auch schon, und sollten besser kommuniziert werden.
+
+```{r}
+bedarfe <- data.frame(
+value = str_wrap(c(
+  "\"Software zur Datenvisualisierung, z.B. GraphPad prism\"",
+  "\"Overleaf\"",
+  "\"Charité-weite Infrastruktur, die das Arbeiten mit klinischen Daten unter Einhaltung von Standards einfach macht. Health Data Platform erreicht dies bisher nicht.\"",
+  "\"DataLad zur Versionierung\"",
+  "\"Große Cloud-Speicher zum Teilen von Daten (100e GB) außerhalb der eigenen Einrichtung\"",
+"\"Schnelle, frei verfügbare Rechenleistung, auch im Homeoffice\"",
+"\"Lösungen zum data sharing personenbezogener Daten mit externen Partnern\"",
+"\"Consultation on tolls for reproducible computational enironments (e.g. Binder)\"",
+"\"freier Zugang zu Statistiksoftwares\"",
+"\"Zentrale Data access committees\""), 40),
+n = c(1,1,1,1,1,1,3,1,1,2)
+)
+
+nn = sum(bedarfe$n)
+
+```
+
+[Anm. JT: Vermutlich eher Auflistung als Wordcloud, oder?]
+
+>"Software zur Datenvisualisierung, z.B. GraphPad prism"
+
+>"Overleaf"
+
+>"Charité-weite Infrastruktur, die das Arbeiten mit klinischen Daten unter Einhaltung von Standards einfach macht. Health Data Platform erreicht dies bisher nicht."
+
+>"DataLad zur Versionierung"
+
+>"Große Cloud-Speicher zum Teilen von Daten (100e GB) außerhalb der eigenen Einrichtung"
+
+>"Schnelle, frei verfügbare Rechenleistung, auch im Homeoffice"
+
+>"Lösungen zum data sharing personenbezogener Daten mit externen Partnern"
+
+>"Consultation on tolls for reproducible computational enironments (e.g. Binder)"
+
+>"freier Zugang zu Statistiksoftwares"
+
+>"Zentrale Data access committees"
+
+```{r wordcloud-bedarfe, fig.cap="Nicht vorgehaltene Lösungen"}
+# Word Cloud
+
+set.seed(44)
+ggplot(bedarfe, aes(
+  label = value,
+  size = n,
+  color = n
+)) + #, angle = angle
+  geom_text_wordcloud_area(eccentricity = 1) +
+  # geom_text_wordcloud() +
+  # scale_size_area(max_size = 10) +
+  scale_radius(range = c(2.5, 3), limits = c(0, NA)) +
+  theme_minimal() +
+  scale_color_gradient(low = col_lik[3], high = col_lik[5]) +
+  labs(
+  title = "<b>Sind Ihnen […] Lösungen bekannt, die an der Charité jedoch nicht vorgehalten werden?</b>",
+  caption = glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
+                             nn = nn)) +
+  theme(
+    plot.title = element_markdown(
+      family = "Arial",
+      size = 10.5,
+      hjust = 0.5
+    ), 
+    plot.background = element_rect(fill = "#F2F2F2", linetype = 0),
+    panel.border = element_blank(),
+    plot.margin = margin(0.4, 0, 0, 0, "cm"),
+    plot.caption = element_text(family = "Arial", color = "#444444",  size = 7.5, hjust = 0.92, margin = margin(0, 0, 0.2, 0, "cm"))
+  ) 
+```
