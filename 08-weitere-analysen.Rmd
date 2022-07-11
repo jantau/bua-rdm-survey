@@ -1,0 +1,267 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+# Weitere Analysen {#weitere-analysen}
+
+## Bekanntheit der Open Data-LOM (Leistungsorientierte Mittelvergabe)
+
+Die Leistungsorientierte Mittelvergabe (LOM) ist 70,7% (328 von 464) der Umfrageteilnehmenden bekannt. Die Open Data LOM ist hingegen lediglich 26,1% (121 von 464) der Befragten bekannt. 7,5% (35 von 464) der Teilnehmenden gaben an, die Open Data LOM bereits einmal oder mehrmals erhalten zu haben.
+
+```{r instrumente-1, fig.cap="LOM und Open Data LOM"}
+lom <- data %>%
+  filter(str_detect(question_id, "^LOM($|1)")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt"))
+
+lom2 <- data %>%
+  filter(str_detect(question_id, "^LOM2")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+ # filter(value %in% c("1", "2")) %>%
+  select(data_id, value_decoded) %>%
+  count(value_decoded)
+
+lom2_df <- data.frame(
+    label = "Open Data\nLOM erhalten",
+    n = 35,
+    value = 35/464,
+    parent = "Open Data\nLOM bekannt",
+    nn = 464
+  )
+
+test <- lom %>%
+  filter(question_id == "LOM") %>%
+  select(data_id, value_decoded) %>%
+  # pivot_wider(values_from = value_decoded) %>%
+  group_by(label = value_decoded) %>%
+  count() %>%
+  #  drop_na(LOM) %>%
+  ungroup() %>%
+  mutate(value = n / sum(n)) %>%
+  mutate(label = case_when(
+    label == "Ja" ~ "LOM bekannt",
+    TRUE ~ "LOM unbekannt"
+  )) %>%
+  mutate(parent = NA) %>%
+  mutate(label = factor(label, levels = c("LOM bekannt", "LOM unbekannt"))) %>%
+  complete(label, fill = list(n = 0, value = 0, parent = NA))
+
+
+test2 <- lom %>%
+  filter(question_id == "LOM1") %>%
+  select(data_id, value_decoded) %>%
+  group_by(label = value_decoded) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(value = n / sum(test$n)) %>%
+  mutate(label = case_when(
+    label == "Ja" ~ "Open Data\nLOM bekannt",
+    TRUE ~ "Open Data\nLOM unbekannt"
+  )) %>%
+  mutate(parent = "LOM bekannt")
+
+test3 <- bind_rows(test, test2) %>%
+  mutate(nn = n[label == "LOM bekannt"] + n[label == "LOM unbekannt"])
+
+test3 <- bind_rows(test3, lom2_df)
+
+test3 <- test3 %>%
+  filter(label != "Open Data\nLOM unbekannt")
+
+# test3 %>%
+#   plot_ly(
+#     parents = ~parent,
+#     labels = ~label,
+#     values = ~value,
+#     type = "sunburst",
+#     branchvalues = "total",
+#     text = ~ paste0(round(value * 100, 1), "%\n(", n, ")"),
+#     sort = FALSE,
+#     leaf = list(opacity = 1),
+#     # colors = col_2_cat,
+#     # rotation = 198,
+#     textinfo = "label+text",
+#     insidetextorientation = "horizontal"
+#   ) %>%
+#   layout(colorway = ~ col_lik[c(5, 1)]) %>%
+#   layout_title(text = "Bekanntheit von LOM und Open Data LOM", margin = list(t = 0, r = -20, l = -20)) %>%
+#   layout_caption() %>%
+#   layout_mode_bar()
+```
+
+
+```{r instrumente-2, fig.cap="LOM und Open Data LOM"}
+fig <- plot_ly(
+  type = "sankey",
+  textfont = list(size = 13, color = "black"),
+  arrangement = "snap",
+  node = list(
+    label = c(
+      "Alle Teilnehmenden", #0
+      "LOM bekannt (71%)", #1
+      "LOM unbekannt (29%)", #2
+      "Open Data LOM bekannt\n(26%)", #3
+      "Open Data LOM unbekannt\n(45%)", #4
+      "OD LOM MEHRMALS erhalten", #5
+      "OD LOM EINMAL erhalten", #6
+      "OD LOM NICHT erhalten", #7
+      "UNSICHER, ob OD LOM erhalten" #8
+    ), 
+    x = c(0, 0.23, 0.23, 0.45, 0.45, 1, 1, 1, 1),
+    y = c(0, 0.3, 0.3, 0.1, 0.3, 0.25, 0.3, 0.35, 0.4),
+    color = c(col_lik[5], col_lik[5], col_lik[1], col_lik[5], col_lik[1],
+              col_lik[5], col_lik[4], col_lik[1], col_lik[3]
+      
+    ),
+    pad = 10), # 10 Pixel
+  link = list(
+    source = c(0,    0,  1,  1,  3, 3, 3, 3),
+    target = c(1,    2,  3,  4,  5, 6, 7, 8),
+    value = c(328, 136, 121,205, 17,18,55,29),
+    color = c(
+      "#21527B33", "#85255733", "#21527B33", "#85255733", "#21527B33", "#7DAABE33","#85255733", "#76767633")
+    ))
+fig %>% layout_mode_bar() %>%
+  layout_caption(nn = 464) %>%
+  layout_title(text = "Bekanntheit von LOM und Open Data LOM", margin = list(l = 40, r = 40, t = 60))
+```
+
+
+```{r demo-status-sankey, fig.cap="Beruflicher Status und Teamleitung"}
+# Sankey diagram
+# 
+# fig <- plot_ly(
+#     type = "sankey",
+#     orientation = "h",
+#     textfont = list(size = 14, color = "black"),
+#     node = list(
+#       label = c(
+#         "Professor*in (57)",
+#         "Wiss. Mitarbeiter*in (270)",
+#         "Doktorand*in (93)",
+#         "Andere (51)",
+#         "Teamleitung (171)",
+#         "KEINE Teamleitung (300)"
+#       ),
+#       color = c(
+#         "#D873AB", # 0
+#         "#367BBA", # 1
+#         "#A6A6A6", # 2
+#         "#E1C047", # 3
+#         "#21527BCC",
+#         "#852557CC"
+#       ), 
+#       customdata = round(c(57,270,51,93,171,300)/471*100,1),
+#       hovertemplate = "%{label}
+#       Perc: %{customdata}%<extra></extra>",
+#       pad = 15,
+#       thickness = 20,
+#       line = list(
+#         color = "grey",
+#         width = 0
+#       )
+#     ),
+#     link = list(
+#       source = c(0, 0, 1, 1,  2, 2, 3, 3),
+#       target = c(4, 5, 4, 5,  4, 5, 4, 5),
+#       #value = c(55L,2L, 90L,180L, 7L,86L, 19L,32L),
+#       value =  c(55,2, 90,180, 7,86, 19,32),
+#       customdata = round(c(55,2, 90,180, 7,86, 19,32)/471*100,1),
+#       color = c(
+#         "#D873AB80",
+#         "#D873AB80",
+#         "#367BBA80",
+#         "#367BBA80",
+#         "#A6A6A680",
+#         "#A6A6A680",
+#         "#E1C04780",
+#         "#E1C04780"
+#       ),
+#       hovertemplate =
+#       "Quelle: %{source.label}
+#       Ziel: %{target.label}
+#       Perc: %{customdata}%"
+#     )
+#   )
+# fig %>%
+#   layout_mode_bar() %>%
+#   layout_caption(nn = 471) %>%
+#   layout_title(text = "Beruflicher Status und Teamleitung", margin = list(l = 100, r = 100, t = 60))
+
+
+```
+
+## Bekanntheit weiterer Services und Regelungen mit FDM-Bezug
+
+```{r}
+
+gwp <- data %>%
+  filter(str_detect(question_id, "^REG_2$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  select(data_id, value_decoded) %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(perc = n / nn)
+```
+
+
+22% (100 von 447) sind die Vorgaben zu Forschungsdaten aus der Satzung der Charité zur Sicherung Guter Wissenschaftlicher Praxis nicht bekannt.
+
+Zudem wurden auf die Frage "Sind Ihnen […] Lösungen bekannt, die an der Charité jedoch nicht vorgehalten werden?" einige Antworten gegeben, die darauf hindeuten, dass vorhandenen Angebote nicht ausreichend bekannt sind:
+
+>"Beratung durch Statistiker*innen"
+
+>"Management von identifizierenden Daten ist stark verbesserungsbedürftig"
+
+>"Sharepoint"
+
+>"I don’t know what tools are already provided by Charité"
+
+>"Unfortunately I am not even aware of what Charité currently provides"
+
+## Praktiken mit Bezug zu Datenmanagementplänen (DMPs)
+
+```{r}
+dmp <- data %>%
+  filter(str_detect(question_id, "^DMP1")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "DMP falsch verstanden")) %>%
+  select(data_id, value_decoded) %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(perc = n/nn) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Ja, mehrmals", "Ja, einmal", "Ich weiß nicht", "Nein"))) %>%
+  arrange(value_decoded)
+
+dmp %>%
+  plot_ly(
+  labels = ~value_decoded,
+  values = ~n,
+  textposition = "inside",
+  texttemplate = ~ str_glue("{value_decoded}
+  {round(perc * 100, 1)}%
+  ({n})"),
+  insidetextorientation = "horizontal",
+  automargin = TRUE,
+  showlegend = FALSE,
+  sort = FALSE,
+  direction = "clockwise",
+  pull = c(0, 0, 0, 0),
+  marker = list(
+    colors = col_lik[c(5,4,3,1)],
+    line = list(col = "#FFFFFF", width = 1)
+  ),
+  type = "pie"
+) %>%
+  layout_title(text = "Haben Sie schon einmal\neinen Datenmanagementplan (DMP) erstellt?
+") %>%
+  layout_caption() %>%
+  layout_mode_bar() %>%
+  layout(uniformtext = list(minsize = 12, mode = "hide"))
+
+```
+

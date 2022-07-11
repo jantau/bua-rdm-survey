@@ -7,9 +7,8 @@ rm(list = ls(all = TRUE))
 knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
-  warning = FALSE
-  #,
-  #out.width = "100%"
+  warning = FALSE,
+  out.width = "100%"
 )
 
 # Load libraries
@@ -19,7 +18,11 @@ library(janitor)
 library(kableExtra)
 library(plotly)
 library(tidyverse)
-
+#For pdf export needed
+#https://github.com/thomasp85/ggraph/issues/152
+#Problems with pdf and plotly: https://stackoverflow.com/questions/46780101/rmarkdown-bookdown-with-plotly
+#library(extrafont)
+#extrafont::loadfonts()
 
 # Load data
 # Input data is stored locally for data protection reasons
@@ -200,7 +203,7 @@ layout_caption <- function(p,
                              nn = max(nn)
                            ),
                            hovertext = NULL,
-                           align = "left",
+                           align = "right",
                            nn = NULL,
                            showarrow = FALSE,
                            xref = "paper",

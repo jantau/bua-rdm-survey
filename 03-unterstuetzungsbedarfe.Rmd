@@ -1,0 +1,483 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Es gibt ungedeckte Bedarfe nach Werkzeugen und Support – je nach Gruppe unterschiedliche {#support}
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+## Es fehlen technische Werkzeuge für das FDM – besonders für Datenmanagementpläne {#technische-werkzeuge}
+
+Werkzeuge zur Erstellung von Datenmanagementplänen stechen unter den fehlenden technischen Werkzeugen für das FDM heraus. Diese fehlen 47% (221 von 466) der Teilnehmenden. Für den Datenaustausch zwischen verschiedenen Systemen fehlen zudem 39% der Teilnehmenden Werkzeuge. Aber auch andere Werkzeuge für das FDM fehlen einer größeren Gruppe von 25% bis 32% der Teilnehmenden.
+
+Seltener wurden nur Werkzeuge als fehlend benannt, die nur i.w.S. zum FDM gehören (Visualisierung, Datenanalyse, Publikation). Dies spricht dafür, dass andere Praktiken im Umgang mit digitalen Daten schon besser abgedeckt sind.
+
+
+```{r bedarfe-1, fig.cap="Technische Werkzeuge", out.height="550px"}
+tools <- data %>%
+  filter(str_detect(question_id, "^TOOL_.($|[0-6]$)")) %>%
+  filter(value != "-998") %>%
+  select(data_id, fct_levels, value) %>%
+  group_by(fct_levels, value) %>%
+  count() %>%
+  group_by(fct_levels) %>%
+  mutate(nn = sum(n)) %>%
+  ungroup() %>%
+  mutate(perc = n / nn) %>%
+  mutate(fct_levels = str_trim(fct_levels)) %>%
+  mutate(fct_levels = case_when(
+    fct_levels %in% c("Erstellung von Datenmanagementplänen", "Datenaustausch zwischen verschiedenen Systemen", "Mir fehlen keine technischen Werkzeuge.") ~ paste0("<span style='font-weight:bold; text-decoration:underline'>", fct_levels, "</span>"),
+    TRUE ~ fct_levels
+  )) %>%
+  
+  # mutate(fct_levels = str_wrap(fct_levels, 35)) %>%
+  mutate(fct_levels = fct_reorder(fct_levels, perc, first, .desc = TRUE)) %>%
+  mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein")))
+
+tools %>%
+  plot_ly(
+    x = ~perc,
+    y = ~fct_levels,
+    color = ~value,
+    colors = col_lik[c(5, 1)],
+    hoverinfo = "text",
+    hovertext = ~ str_glue(
+      "<b>{fct_levels}—{value}</b>
+    {n} ({round(perc*100, 1)}%)"
+    )
+  ) %>%
+  add_bars(
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11)
+  ) %>%
+  layout_bar_flip(barmode = "stack") %>%
+  layout_title(
+    margin = list(t = 80),
+    text = "Für welche Aufgaben des Forschungsdatenmanagements\nfehlen Ihnen geeignete technische Werkzeuge?"
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+
+Lediglich 17%[^anzahl-bedarfe] der Teilnehmenden gaben an, dass ihnen keine technischen Werkzeuge fehlen. Dem gegenüber listeten 36% der Teilnehmenden fünf oder mehr Werkzeuge für das FDM als fehlend, was für vielfältige Bedarfe spricht.
+
+[^anzahl-bedarfe]: Differenz zu "Mir fehlen keine technischen Werkzeuge" resultiert aus Teilnehmenden, die keiner Antwortmöglichkeit zugestimmt haben. Sowohl Teilnehmende, die keine Antwortmöglichkeit ausgewählt haben, als auch diejenigen, die der Antwortmöglichkeit "Mir fehlen keine technischen Werkzeuge" zugestimmt haben, wurden als Teilnehmenden ohne fehlende technische Werkzeuge gezählt.
+
+
+```{r bedarfe-5, fig.cap="Technische Werkzeuge"}
+tools_n <- data %>%
+  filter(str_detect(question_id, "^TOOL_.($|[0-57]$)")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, question_id, fct_levels, value) %>%
+  mutate(
+    value = case_when(
+      question_id == "TOOL_17" ~ "1",
+      TRUE ~ value
+    ),
+    fct_levels = case_when(
+      question_id == "TOOL_17" ~ "Sonstiges, und zwar",
+      TRUE ~ fct_levels
+    )
+  ) %>%
+  mutate(nn = n_distinct(data_id)) %>%
+  group_by(data_id, nn) %>%
+  summarise(value = sum(as.numeric(value))) %>%
+  ungroup() %>%
+  mutate(value = fct_collapse(as.character(value),
+    "Keine" = "0",
+    "1" = "1",
+    "2" = "2",
+    "3" = "3",
+    "4" = "4",
+    "5 oder mehr" = as.character(5:15)
+  )) %>%
+  group_by(value, nn) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(value = factor(value, levels = c("Keine", "1", "2", "3", "4", "5 oder mehr"))) %>%
+  arrange(value) %>%
+  mutate(perc = n / nn)
+
+col <- c(col_cat, " #a675d7")
+
+tools_n %>%
+  plot_ly(
+    labels = ~value,
+    values = ~n,
+    textposition = "inside",
+    texttemplate = ~ str_glue("{value}
+                            {round(perc*100, 1)}% ({n})"),
+    insidetextorientation = "horizontal",
+    sort = FALSE,
+    automargin = TRUE,
+    showlegend = FALSE,
+    direction = "clockwise",
+    pull = c(0, 0, 0, 0, 0, 0.1),
+    marker = list(
+      colors = rev(col_lik_6),
+      line = list(col = "#FFFFFF", width = 1)
+    ),
+    type = "pie"
+  ) %>%
+  layout_title(text = "Wieviele technische Werkzeuge fehlen den Umfrageteilnehmenden?") %>%
+  layout_caption(text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
+    nn = max(nn)
+  )) %>%
+  layout_mode_bar() %>%
+  layout(uniformtext = list(minsize = 11, mode = "hide"))
+```
+
+
+## Mehr Personal würde zu besserem FDM motivieren – v.a. die Teamleitungen {#mehr-personal}
+
+Diese Frage verlangte eine Einfach-Auswahl. Mit 41% (175 von 429) waren zusätzliche Personalressourcen für FDM-Aufgaben der mit Abstand wichtigste Motivator, sich stärker im Bereich FDM zu engagieren. Allerdings war dies für Teamleitungen sehr viel wichtiger (54%) als für Nicht-Teamleitungen (34%). 
+
+Umgekehrt gaben Teilnehmende ohne Leitungsaufgabe deutlich häufiger an, dass v.a. eine höhere Sichtbarkeit von Datenpublikationen oder eine Berücksichtigung bei Berufungen sie motivieren würde. Aber auch bei Teilnehmenden ohne Leitungsaufgabe waren Personalressourcen die wichtigste Motivation.
+
+
+```{r bedarfe-2, fig.cap="Größter Anreiz"}
+
+anreize <- data %>%
+  filter(str_detect(question_id, "^ICT_1$|LEAD")) %>%
+  filter(!value %in% c("-998", "-999")) %>%
+  select(data_id, question_id, value_decoded) %>%
+  pivot_wider(names_from = question_id, values_from = c(value_decoded)) %>%
+  drop_na(ICT_1) %>%
+  # Summarise
+  group_by(LEAD, ICT_1) %>%
+  count() %>%
+  # Create totals
+  group_by(ICT_1) %>%
+  group_modify(~ .x %>% adorn_totals("row", name = "Alle")) %>%
+  group_by(LEAD) %>%
+  # N per group
+  mutate(nn = sum(n)) %>%
+  ungroup() %>%
+  # Perc
+  mutate(perc = n / nn) %>%
+  # Data preparation for plotting
+  mutate(ICT_1 = str_wrap(ICT_1, 50)) %>%
+  mutate(ICT_1 = fct_reorder(ICT_1, n, first, .desc = TRUE))
+
+# Plotly
+anreize %>%
+  plot_ly(
+    textfont = list(color = "white", size = 11),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0
+  ) %>%
+  add_trace(
+    x = ~ perc[anreize$LEAD == "Alle"],
+    y = ~ ICT_1[anreize$LEAD == "Alle"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[anreize$LEAD == "Alle"] * 100),
+      n = n[anreize$LEAD == "Alle"],
+      nn = nn[anreize$LEAD == "Alle"]
+    ),
+    name = ~ glue::glue("Alle\n(n={n})", n = nn[anreize$LEAD == "Alle"]),
+    marker = list(color = col_lik[3]),
+    type = "bar"
+  ) %>%
+  add_trace(
+    x = ~ perc[anreize$LEAD == "Ja"],
+    y = ~ ICT_1[anreize$LEAD == "Ja"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[anreize$LEAD == "Ja"] * 100),
+      n = n[anreize$LEAD == "Ja"],
+      nn = nn[anreize$LEAD == "Ja"]
+    ),
+    name = ~ glue::glue("Ja\n(n={n})", n = nn[anreize$LEAD == "Ja"]),
+    marker = list(color = col_lik[5]),
+    type = "bar",
+    visible = "legendonly"
+  ) %>%
+  add_trace(
+    x = ~ perc[anreize$LEAD == "Nein"],
+    y = ~ ICT_1[anreize$LEAD == "Nein"],
+    text = ~ glue::glue(
+      "{perc}% ({n})",
+      perc = round(perc[anreize$LEAD == "Nein"] * 100),
+      n = n[anreize$LEAD == "Nein"],
+      nn = nn[anreize$LEAD == "Nein"]
+    ),
+    name = ~ glue::glue("Nein\n(n={n})", n = nn[anreize$LEAD == "Nein"]),
+    marker = list(color = col_lik[1]),
+    type = "bar",
+    visible = "legendonly"
+  ) %>%
+  layout_bar_flip(
+    autorange = "reversed",
+    range = c(-0.01, 0.55),
+    uniformtext = list(minsize = 8, mode = "hide"),
+    legend_title = "Leiten Sie ein Team?"
+  ) %>%
+  layout_title(
+    margin = list(t = 80),
+    text = "Was wäre für Sie der größte Anreiz,\nstärker in das Forschungsdatenmanagement zu investieren?"
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+## Hoher Bedarf an fachlicher Unterstützung zu FDM-Themen
+
+Für alle genannten Aufgaben des FDM bis auf Analyse-Codes wurde von >50% der Teilnehmenden ein (eher) hoher Bedarf geäußert (4 oder 5 auf einer Skala von 1 bis 5). Wie bei FDM-Werkzeugen, war auch bei fachlicher Unterstützung der Bedarf im Bereich Datenmanagementpläne besonders hoch (68% gaben einen (eher) hohen Bedarf an).^[Antwortmöglichkeit "kann ich nicht einschätzen" wurde entfernt.]
+
+```{r}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP4_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "kann ich nicht einschätzen", "Filtersprung")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Kein Bedarf", "2", "3", "4", "hoher Bedarf"))) %>%
+  mutate(nn = length(unique(data_id))) %>%
+  count(label, value_decoded, value, nn) %>%
+  group_by(label) %>%
+  mutate(
+    perc = n / sum(n),
+    mean = sum(as.numeric(value) * n) / sum(n),
+    n_group = sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(label = paste0(label, "\nM ", round(mean, 1))) %>%
+  mutate(label = fct_reorder(label, .x = mean, .desc = FALSE))
+```
+
+
+```{r unterstuetzung-1, fig.cap='Unterstützungsbedarf'}
+
+# support %>% plot_ly(x = ~ perc,
+#                  y = ~ label,
+#                  color = ~ value_decoded) %>%
+#   add_bars(
+#     colors = col_lik,
+#     text = ~ paste0(round(perc * 100, 0), "%"),
+#     textposition = 'inside',
+#     insidetextanchor = "middle",
+#     textangle = 0,
+#     insidetextfont = list(color = "white") #, size = 14
+#   ) %>%
+#   layout_bar_flip(barmode = "stack") %>%
+#   layout_title(text = "Welchen Bedarf haben Sie an fachlicher Unterstützung\nzu folgenden Themen?") %>%
+#   layout(legend = list(orientation = 'h')) %>%
+#   layout_caption() %>%
+#   layout_mode_bar()
+```
+
+
+```{r unterstuetzung-2, fig.cap='Unterstützungsbedarf'}
+support <- data %>%
+  filter(str_detect(question_id, "^SUP4_")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "kann ich nicht einschätzen", "Filtersprung")) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Kein Bedarf", "2", "3", "4", "hoher Bedarf"))) %>%
+  mutate(nn = length(unique(data_id))) %>%
+  select(data_id, label, value_decoded, value, nn) %>%
+  group_by(label) %>%
+  mutate(median = median(as.numeric(value)),
+         mean2 = mean(as.numeric(value))) %>%
+  ungroup() %>%
+  count(label, value_decoded, value, nn, median, mean2) %>%
+  group_by(label) %>%
+  mutate(
+    perc = n / sum(n),
+    mean = sum(as.numeric(value) * n) / sum(n),
+    n_group = sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(label = paste0(label, "\nM=", round(mean, 1), ", Md=", median, ", n=", n_group)) %>%
+  mutate(label = case_when(
+    str_detect(label, "Datenmanagementplan.*") ~ paste0("<span style='font-weight:bold; text-decoration:underline'>", label, "</span>"),
+    TRUE ~ label
+  )) %>%
+  mutate(label = fct_reorder(label, .x = mean, .desc = FALSE))
+
+plot_ly(
+  textposition = "inside",
+  insidetextanchor = "middle",
+  textangle = 0,
+  insidetextfont = list(color = "white", size = 11)
+) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "Kein Bedarf"),
+    x = ~perc,
+    y = ~label,
+    name = "Kein Bedarf",
+    marker = list(color = col_lik[5]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    visible = "legendonly"
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "2"),
+    x = ~perc,
+    y = ~label,
+    name = "2",
+    marker = list(color = col_lik[4]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    visible = "legendonly"
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "3"),
+    x = ~perc,
+    y = ~label,
+    name = "3",
+    marker = list(color = col_lik[3]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    visible = "legendonly"
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "4"),
+    x = ~perc,
+    y = ~label,
+    name = "4",
+    marker = list(color = col_lik[2]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")")
+  ) %>%
+  add_bars(
+    data = support %>% filter(value_decoded == "hoher Bedarf"),
+    x = ~perc,
+    y = ~label,
+    name = "hoher Bedarf",
+    marker = list(color = col_lik[1]),
+    color = ~value_decoded,
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")")
+  ) %>%
+  layout_bar_flip(barmode = "stack") %>%
+  layout_title(text = "Welchen Bedarf haben Sie an fachlicher Unterstützung\nzu folgenden Themen?") %>%
+  layout_caption(hovertext = "M=Mittelwert, Md=Median") %>%
+  layout_mode_bar() %>%
+  layout(legend = list(orientation = "h")) %>%
+  add_annotations(x = 0.5,
+                  y = 1,
+                  xshift = -100,
+                  yshift = 30,
+                  xref = "paper",
+                  yref = "paper",
+                  xanchor = "center",
+                  yanchor = "auto",
+                  text = "M=Mittelwert, Md=Median (Hover für weitere Infos)",
+                  font = list(size = 10), # #F2F2F2
+                  hovertext = str_wrap("Antwortmöglichkeit “kann ich nicht einschätzen” wurde entfernt", 100),
+                  showarrow = FALSE)
+```
+
+
+
+## Für FDM insgesamt und insbesondere IT-Aspekte des FDM werden viele konkrete Bedarfe geäußert
+
+Teilnehmende konnten an vier verschiedenen Stellen Freitextantworten zu Bedarfen im Bereich FDM geben. Darunter waren zwei reine Freitextfragen sowie zweimal Freitextangaben unter "Sonstiges". Es wurden insgesamt 169 Angaben zu Bedarfen gemacht, die eine große Breite an Diensten, Werkzeugen und Prozessen adressierten.[^bedarfe] 
+
+Dabei waren es zum Teil spezifische Bedarfe, die vorgegebene Antwortkategorien (siehe insbesondere \@ref(technische-werkzeuge)) genauer erläuterten, zum Teil aber auch in der Umfrage nicht explizit abgefragte Bedarfe. Die größte Gruppe bildeten Bedarfe nach technischen IT-Ressourcen (75 Angaben). Diese gliederten sich noch einmal in diverse Bedarfe auf, wobei der Bedarf nach Lösungen für Datenzugriff durch Externe herausragte (25 Angaben). Spezifische Software-Lösungen wurden ebenfalls oft genannt (18 Angaben), darunter aber keine Software mehr als zweimal. Auch Bedarfe ohne IT-Bezug wurden genannt, dies wurden aber in der Umfrage stärker adressiert (siehe insbesondere \@ref(mehr-personal)), so dass die Angaben in Freitexten hierzu im Vergleich weniger Aussagekraft besitzen.
+
+In dieser Analyse konnte ein Freitextfeld mehreren Bedarfen zugeordnet werden. Mehrere Arten von Angaben wurden aus der Analyse ausgeschlossen: (1) Angaben, dass nichts fehle oder ohne inhaltlichen Bezug zur Frage, (2) Angaben, dass vorhandene Dienste nicht bekannt seien, (3) Kommentare allgemeiner Art, die keinen konkreten Bedarf erkennen ließen und (4) Bedarfe mit explizitem BUA-Bezug. 
+
+[^bedarfe]: Die Fragen wurden pro teilnehmender Person zusammengefasst, so dass eine bestimmte Angabe von der gleichen Person nur einmal gezählt wurde, auch wenn sie an verschiedenen Stellen wiederholt wurde. 
+
+
+```{r}
+# Read categorized freetext answers and deduplicate if necessary
+# library(readxl)
+# fta_loesungen <- read_excel("~/Documents/bua-rdm-survey-data/freitextanalyse _fehlende_loesungen.xlsx", 
+#     sheet = "Sheet2") %>%
+#   mutate(data_id = rep(seq(1, 692, 1), 4), .before = Frage) %>%
+#   select(-Eintrag) %>%
+#   clean_names()
+# 
+# 
+# fta <- fta_loesungen %>% 
+#   group_by(data_id) %>%
+#   #summarise(sum(speicher_platz_backup, na.rm = TRUE))
+#   summarise(across(speicher_platz_backup:standards_guidelines, sum, na.rm = TRUE)) %>%
+#   ungroup() %>%
+#   # Deduplicate by data_id
+#   mutate(across(speicher_platz_backup:standards_guidelines,
+#                 ~ case_when(.x != 0 ~ 1,
+#                             TRUE ~ .x))) %>%
+#   summarise(across(speicher_platz_backup:standards_guidelines, sum, na.rm = TRUE))
+# 
+# test <- data %>%
+#   filter(data_id == "48") %>% #690, 510, 48
+#   filter(question_id %in% c("SOL", "SER", "SUP7_9", "TOOL_17"))
+```
+
+
+```{r fehlende-loesungen, fig.cap="Fehlende Lösungen"}
+fig <- plot_ly(
+  type = "sankey",
+  textfont = list(size = 13.5, color = "black"),
+  arrangement = "snap",
+  node = list(
+    label = c(
+      # 0 level
+      "Alle\nAntworten", #0
+      # 1 level
+      "IT-Ressourcen\n(44%)", #1
+      "Data Governance\n(11%)", #2
+      "andere Ressourcen\n(28%)", #3
+      "Sonstiges\n(17%)", #4
+      # 2 level
+      "technisch", #5
+      "organisatorisch", #6
+      
+      "Data access committee", #7
+      "Bündelung des FDM", #8
+      "administrative Abläufe", #9
+      "Standards/Guidelines", #10
+      
+      "Personal/Data curators", #11
+      "Support", #12
+      "Schulungen", #13
+      "Materialien", #14
+      
+      # 3 level
+      "Speicherung/Backup", #15
+      "Datenzugriff für Externe/\nTeilen von Daten", #16
+      "spezifische Software", #17
+      "Git-Instanz", #18
+      "Management medizinischer\nDokumente/eCRFs", #19
+      "Health Data Platform/DIZ", #20
+      "HPC/Virtual machines", #21
+      "IT-Betreuung", #22
+      
+      "FDM-Beratung", #23
+      "Datenschutz-Support", #24
+      "Datenmanagementpläne" #25
+    ), 
+    x = c(0, rep(0.15, 4), rep(0.4, 10), rep(1, 11)),
+    y = c(0.5, seq(0.1, 0.9, length.out = 4), seq(0.1, 0.9, length.out = 10), seq(0, 1, length.out = 11)),
+    color =
+      c(col_cat[2], col_cat[c(1,3,4,5)], rep(col_cat[1], 2), 
+        rep(col_cat[3], 4), rep(col_cat[4], 4), 
+        rep(col_cat[1], 8), rep(col_cat[4], 3)),
+    pad = 10), # 10 Pixel
+  link = list(
+    source = c(0, 0, 0, 0,
+               1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+               5, 5,  5, 5,  5, 5, 5, 6, 12,12,14), 
+    target = c(1, 2, 3, 4,
+               5, 6, 7, 8, 9,10,11,12,13,14,   
+              15,16,17,18,19,20,21,  22, 23,24,25), 
+    value = c(75,18,48,28, 
+              71, 4, 2, 6, 4, 6, 15,16,13,4, 
+              9,25,18,4,7,2,6,        4,  10, 6,4),
+    color = c("#76767633")))
+
+  
+fig %>% layout_mode_bar() %>%
+  layout_caption(nn = 169) %>%
+  layout_title(text = "Kategorisierte Freitextantworten zu\ngewünschten Diensten, Werkzeugen und Lösungen", margin = list(l = 40, r = 40, t = 60))
+
+#seq(0, 1, length.out = 11)
+#seq(0, 0.6, length.out = 8), seq(0.7, 1, length.out = 3)
+```

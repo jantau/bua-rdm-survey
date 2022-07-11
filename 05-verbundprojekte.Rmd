@@ -1,0 +1,416 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Infrastrukturen und Support für das FDM sind in Verbundprojekten besonders wichtig {#foerderung}
+
+```{r, include=FALSE}
+source("source.R")
+```
+
+
+35% (162) der Teilnehmenden wurden in nationalen Verbundprojekten (Exzellenzcluster, Sonderforschungsbereich, Transregio, Verbundprojekt des Bundes oder DFG) gefördert. 14,3% (66)  werden durch europäische Förderstrukturen (European Research Council oder EU-Verbundprojekt) gefördert. 62,6% der Teilnehmenden sind in keine Verbundförderstrukturen eingebunden.^[Bei dieser Frage war eine Mehrfachauswahl möglich.]
+
+```{r support, fig.cap="Förderstruktur"}
+drittm <- data %>%
+  filter(str_detect(question_id, "^ORG_[1-9]")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  drop_na(value_decoded) %>%
+  group_by(data_id) %>%
+  # Change DFG input to nationale Förderung and remove ORG_7
+  mutate(
+    question_id = case_when(
+      any(str_detect(question_id, "^ORG_[89]")) &
+        any(str_detect(value, regex("^DFG (Forscher.*|Forschungs.*|klinische.*|Schwerpunkt.*)", ignore_case = TRUE))) ~ "ORG_1",
+      str_detect(question_id, "^ORG_[89]") &
+        str_detect(value, regex("^DFG (Forscher.*|Forschungs.*|klinische.*|Schwerpunkt.*)", ignore_case = TRUE), negate = TRUE) ~ "ORG_7",
+      TRUE ~ question_id
+    )
+  ) %>%
+  # Create new column
+  mutate(
+    value_grouped = case_when(
+      # Do not create new group 
+      # any(str_detect(question_id, "^ORG_[1235]$")) &
+      #   any(str_detect(question_id, "^ORG_[46]$")) ~ "nationale und europ. Förderung",
+      str_detect(question_id, "^ORG_[1235]$") ~ "nationale Verbundprojekte",
+      str_detect(question_id, "^ORG_[46]") ~ "EU-Verbundprojekte",
+      str_detect(question_id, "^ORG_[7]") ~ "keine Verbundförderung",
+      TRUE ~ as.character(NA)
+    )
+  ) %>%
+  select(data_id, question_id, value_grouped) %>%
+  ungroup() %>%
+  drop_na(value_grouped) %>%
+  # Use distinct distinct(data_id, .keep_all = TRUE) for nat u europ. Förderung
+  distinct(data_id, value_grouped, .keep_all = TRUE) %>%
+  select(-question_id)
+
+drittm_count <- drittm %>%
+ # add_count(name = "nn") %>%
+  mutate(nn = length(unique(data_id))) %>%
+  count(value_grouped, nn) %>%
+  mutate(value_grouped = str_wrap(value_grouped, 20)) %>%
+  mutate(value_grouped = fct_reorder(value_grouped, n, .desc = TRUE)) %>%
+  arrange(-n)
+
+drittm_count %>%
+  plot_ly(
+    labels = ~value_grouped,
+    values = ~n,
+    textposition = "inside",
+    texttemplate = ~ str_glue("{value_grouped}
+                            {round((n/nn)*100, 1)}% ({n})"),
+    insidetextorientation = "horizontal",
+    automargin = TRUE,
+    showlegend = FALSE,
+    direction = "clockwise",
+  #  pull = c(0.05, 0, 0, 0),
+    marker = list(
+      colors = col_cat[c(1:3, 5)],
+      line = list(col = "#FFFFFF", width = 1)
+    ),
+    type = "pie"
+  ) %>%
+  layout_title(text = "Welcher Organisationseinheit\nbzw. welcher Form von Förderstruktur gehören Sie an?", margin = list(t = 100)) %>%
+  layout_caption() %>%
+  layout_mode_bar() %>%
+  layout(uniformtext = list(minsize = 11, mode = "show"))
+```
+
+## Forschende in Verbundprojekten haben mehr Bezüge zum Thema FDM
+
+Teilnehmende, die in Verbundprojekten engagiert sind, haben in deutlich mehr Kontexten Kontakt mit dem Thema FDM gehabt, als andere. Bei Beteiligung an europäischen oder nationalen Verbundprojekten gaben 28% bzw. 27% fünf oder mehr Bezüge zum FDM an, ohne solche Förderung nur 19%. Umgekehrt war das Bild bei der Angabe, keinen oder maximal einen Bezug zum FDM zu haben. Allerdings ist dabei zu berücksichtigen, dass neben Bezügen, die auf alle zutreffen konnten (z.B. eigene Forschungspraxis, Lehrveranstaltungen, Fachcommunity) auch „Forschungsförderung“ zur Auswahl stand.
+
+```{r förderung-3, fig.cap="Förderstruktur"}
+# Create df with distinct data_id of Förderung in order to filter other variables for only data_ids with Förderung
+drittm_distinct <- drittm %>% distinct(data_id)
+
+con <- data %>%
+  filter(str_detect(question_id, "^CON_([1-9]$|11)")) %>%
+  select(data_id, value) %>%
+  # Change freetext answers to 1
+  filter(value != "-999") %>%
+  mutate(value = case_when(
+    !value %in% c("0", "1") ~ "1",
+    TRUE ~ value
+  )) %>%
+  group_by(data_id) %>%
+  summarise(sum_con = sum(as.numeric(value))) %>%
+  # Group contacts
+  mutate(
+    sum_con = case_when(
+      sum_con == 0 ~ "keine",
+      sum_con == 1 ~ "1",
+      sum_con == 2 ~ "2",
+      sum_con == 3 ~ "3",
+      sum_con == 4 ~ "4",
+      sum_con >= 5 ~ "5 oder mehr"
+    )
+  ) %>%
+  right_join(drittm_distinct, by = "data_id")
+
+con_alle <- con %>%
+  add_count(name = "nn") %>%
+  count(sum_con, nn) %>%
+  mutate(n_group = nn,
+         perc = n/n_group,
+         value_grouped = "Alle")
+
+con_drittm <- drittm %>%
+  left_join(con, by = "data_id") %>%
+  mutate(nn = length(unique(data_id))) %>%
+  group_by(value_grouped) %>%
+  mutate(n_group = length(unique(data_id))) %>%
+  ungroup() %>%
+  count(across(-data_id)) %>%
+  mutate(perc = n/n_group)
+
+con_drittm_all <- bind_rows(con_alle, con_drittm) %>%
+  mutate(sum_con = factor(sum_con, levels = c(
+    "5 oder mehr",
+    "4",
+    "3",
+    "2",
+    "1",
+    "keine"
+  ))) %>%
+  # Factorize value_grouped by rank and "Alle" on top
+  mutate(value_grouped = paste0(value_grouped, "\nn=", n_group)) %>%
+  group_by(value_grouped) %>%
+  mutate(rank = max(perc[sum_con == "5 oder mehr"])) %>%
+  ungroup() %>%
+  mutate(rank = dense_rank(desc(rank))) %>%
+  mutate(value_grouped = fct_reorder(value_grouped, rank)) %>%
+  mutate(value_grouped = relevel(value_grouped, 3))
+  
+con_drittm_all %>%
+  plot_ly(
+    x = ~perc,
+    y = ~ value_grouped,
+    color = ~sum_con,
+    colors = col_lik[c(5, 4, 2, 1)],
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11),
+    type = "bar"
+  ) %>%
+  layout_bar_flip(
+    barmode = "stack",
+    autorange = "reversed"
+  ) %>%
+  layout_title(text = "Anzahl Kontakte zum Thema Forschungsdatenmanagement:\nnach Organisationseinheit/Förderstruktur") %>%
+  layout(
+    legend = list(orientation = "h"),
+    shapes = list(
+      type = "line",
+      x0 = -0.05,
+      x1 = 1,
+      xref = "paper",
+      y0 = 0.5,
+      y1 = 0.5,
+      line = list(color = "black", dash = "dot")
+    )
+  ) %>%
+  layout_caption() %>%
+  layout_mode_bar()
+```
+
+## Datenmanagementpläne (DMPs) werden häufiger von Forschenden in Verbundprojekten verfasst {#dmps}
+
+DMPs[^dmps] sind bei EU-Verbundprojekten schon seit Längerem Teil des Antrags. Entsprechend haben 51% der Teilnehmenden in EU-Verbundprojekten bereits mindestens einmal einen DMP erstellt. Bei nationalen Verbundprojekten liegt dieser Anteil bei 33% und somit nur geringfügig über Teilnehmenden, die nicht an Verbundprojekten beteiligt sind (31%). Allerdings ist bei nationaler Förderung angesichts der neuen DFG-Richtlinien zum FDM in Zukunft von einer deutlichen Steigerung auszugehen.
+
+[^dmps]: Zum Begriff des DMPs wurde in der Umfrage erläutert: "Der Datenmanagementplan beschreibt den Umgang mit Forschungsdaten, wie z.B. Speicherung, Archivierung und Veröffentlichung."
+
+```{r förderung-1, fig.cap="Förderstruktur"}
+# DMP1
+
+dmp <- data %>%
+  filter(str_detect(question_id, "^DMP1$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "DMP falsch verstanden")) %>%
+  drop_na(value_decoded) %>%
+  select(data_id, value_decoded) %>%
+  inner_join(drittm_distinct, by = "data_id")
+
+
+
+dmp_alle <- dmp %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(n_group = nn,
+         perc = n/n_group,
+         value_grouped = "Alle")
+
+dritt_dmp <- drittm %>%
+  inner_join(dmp, by = "data_id") %>%
+  mutate(nn = length(unique(data_id))) %>%
+  group_by(value_grouped) %>%
+  mutate(n_group = length(unique(data_id))) %>%
+  ungroup() %>%
+  count(across(-data_id)) %>%
+  mutate(perc = n/n_group)
+
+dritt_dmp_all <- bind_rows(dmp_alle, dritt_dmp) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Ja, mehrmals", "Ja, einmal", "Nein", "Ich weiß nicht"))) %>%
+  # Factorize value_grouped by rank and "Alle" on top
+  mutate(value_grouped = paste0(value_grouped, "\nn=", n_group)) %>%
+  group_by(value_grouped) %>%
+  mutate(rank = max(perc[value_decoded == "Ja, mehrmals"])) %>%
+  ungroup() %>%
+  mutate(rank = dense_rank(desc(rank))) %>%
+  mutate(value_grouped = fct_reorder(value_grouped, rank)) %>%
+  mutate(value_grouped = relevel(value_grouped, 3))
+
+dritt_dmp_all %>%
+  plot_ly(
+    x = ~perc,
+    y = ~value_grouped,
+    color = ~value_decoded,
+    colors = col_lik[c(5, 4, 1, 3)],
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11),
+    type = "bar"
+  ) %>%
+  layout_bar_flip("stack",
+    autorange = "reversed",
+    legend_title = "Haben Sie schon einmal einen DMP erstellt?"
+  ) %>%
+  layout_title(text = "Haben Sie schon einmal einen DMP erstellt?\nnach Organisationseinheit/Förderstruktur") %>%
+  layout_caption() %>%
+  layout_mode_bar() %>%
+  layout(
+    shapes = list(
+      type = "line",
+      x0 = -0.05,
+      x1 = 1,
+      xref = "paper",
+      y0 = 0.5,
+      y1 = 0.5,
+      line = list(color = "black", dash = "dot")
+    )
+  )
+```
+
+Teilnehmende mit Teamleitung haben deutlich häufiger bereits einen DMP erstellt als Teilnehmende ohne Teamleitung.
+
+```{r förderung-lead, fig.cap="DMP und Teamleitung", out.height="400px"}
+##
+# DMP filtered for Teamleitung
+dmp_all <- data %>%
+  filter(str_detect(question_id, "^DMP1$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "DMP falsch verstanden")) %>%
+  drop_na(value_decoded) %>%
+  select(data_id, value_decoded) %>%
+  inner_join(drittm_distinct, by = "data_id")
+
+lead <- data %>%
+  filter(str_detect(question_id, "^LEAD$")) %>%
+  select(data_id, lead = value)
+
+dmp_lead_alle <- dmp_all %>% 
+  left_join(lead, by = "data_id") %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(n_group = sum(n)) %>%
+  mutate(perc = n/n_group) %>%
+  rename(dmp = value_decoded) %>%
+  mutate(lead = "Alle") 
+
+dmp_lead <- dmp_all %>% 
+  left_join(lead, by = "data_id") %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, lead, nn) %>%
+  group_by(lead) %>%
+  mutate(n_group = sum(n)) %>%
+  ungroup() %>%
+  mutate(perc = n/n_group) %>%
+  rename(dmp = value_decoded) %>%
+  mutate(lead = factor(lead, levels = c("0", "1"), labels = c("Teamleitung: Nein", "Teamleitung: Ja")))
+
+dmp_lead_all <- bind_rows(dmp_lead_alle, dmp_lead) %>%
+  mutate(dmp = factor(dmp, levels = c("Ja, mehrmals", "Ja, einmal", "Nein", "Ich weiß nicht"))) %>%
+  # Factorize value_grouped by rank and "Alle" on top
+  mutate(lead = paste0(lead, "\nn=", n_group)) %>%
+  group_by(lead) %>%
+  mutate(rank = max(perc[dmp == "Ja, mehrmals"])) %>%
+  ungroup() %>%
+  mutate(rank = dense_rank(desc(rank))) %>%
+  mutate(lead = fct_reorder(lead, rank)) %>%
+  mutate(lead = relevel(lead, 2))
+
+dmp_lead_all %>%
+  plot_ly(
+    x = ~perc,
+    y = ~lead,
+    color = ~dmp,
+    colors = col_lik[c(5, 4, 1, 3)],
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11),
+    type = "bar"
+  ) %>%
+  layout_bar_flip("stack",
+    autorange = "reversed") %>%
+  layout_title(text = "Haben Sie schon einmal einen DMP erstellt?\nnach Teamleitung") %>%
+  layout_caption() %>%
+  layout_mode_bar() %>%
+  layout(
+    shapes = list(
+      type = "line",
+      x0 = -0.05,
+      x1 = 1,
+      xref = "paper",
+      y0 = 0.5,
+      y1 = 0.5,
+      line = list(color = "black", dash = "dot")
+    )
+  )
+
+##
+```
+
+
+## Forschende in Verbundprojekten nehmen häufiger Unterstützung zu FDM in Anspruch
+
+Forschende in Verbundprojekten (europäisch oder national) nehmen häufiger fachliche Unterstützung zu FDM-Themen in Anspruch (44% bzw. 43% bei Beteiligung an Verbundprojekten vs. 34% bei anderen). Offen ist, was hierfür die entscheidenden Ursachen sind: denkbar wären insbesondere die Bedeutung des FDM bei Drittmittelanträgen (siehe Abschnitt \@ref(dmps) zu DMPs), stärkerer Datenaustausch in Verbundprojekten und/oder projektinterner FDM-Support (Z-Projekte, Data Curator-Stellen).
+
+```{r förderung-2, fig.cap="Förderstruktur"}
+sup <- data %>%
+  filter(str_detect(question_id, "^SUP1$")) %>%
+  filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
+  drop_na(value_decoded) %>%
+  select(data_id, value_decoded) %>%
+  inner_join(drittm_distinct, by = "data_id")
+
+sup_alle <- sup %>%
+  add_count(name = "nn") %>%
+  count(value_decoded, nn) %>%
+  mutate(n_group = nn,
+         perc = n/n_group,
+         value_grouped = "Alle")
+
+dritt_sup <- drittm %>%
+  inner_join(sup, by = "data_id") %>%
+  mutate(nn = length(unique(data_id))) %>%
+  group_by(value_grouped) %>%
+  mutate(n_group = length(unique(data_id))) %>%
+  ungroup() %>%
+  count(across(-data_id)) %>%
+  mutate(perc = n/n_group)
+
+dritt_sup_all <- bind_rows(sup_alle, dritt_sup) %>%
+  mutate(value_decoded = factor(value_decoded, levels = c("Ja", "Nein", "Bin mir nicht sicher"))) %>%
+  # Factorize value_grouped by rank and "Alle" on top
+  mutate(value_grouped = paste0(value_grouped, "\nn=", n_group)) %>%
+  group_by(value_grouped) %>%
+  mutate(rank = max(perc[value_decoded == "Ja"])) %>%
+  ungroup() %>%
+  mutate(rank = dense_rank(desc(rank))) %>%
+  mutate(value_grouped = fct_reorder(value_grouped, rank)) %>%
+  mutate(value_grouped = relevel(value_grouped, 3))
+
+
+
+dritt_sup_all %>%
+  plot_ly(
+    x = ~perc,
+    y = ~value_grouped,
+    color = ~value_decoded,
+    colors = col_lik[c(5, 1, 3)],
+    text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
+    textposition = "inside",
+    insidetextanchor = "middle",
+    textangle = 0,
+    textfont = list(color = "white", size = 11),
+    type = "bar"
+  ) %>%
+  layout_bar_flip(
+    barmode = "stack",
+    autorange = "reversed",
+    legend_title = "Haben Sie fachliche Unterstützung zu FDM-Themen in Anspruch genommen?"
+  ) %>%
+  layout_title(text = "Haben Sie fachliche Unterstützung zu FDM-Themen in Anspruch genommen?\nnach Organisationseinheit/Förderstruktur") %>%
+  layout_caption() %>%
+  layout_mode_bar() %>%
+  layout(
+    shapes = list(
+      type = "line",
+      x0 = -0.05,
+      x1 = 1,
+      xref = "paper",
+      y0 = 0.5,
+      y1 = 0.5,
+      line = list(color = "black", dash = "dot")
+    )
+  )
+```
+
+
