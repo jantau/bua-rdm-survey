@@ -8,15 +8,15 @@ editor_options:
 source("source.R")
 ```
 
-# Unterstützung in FDM-Fragen wird oft in Anspruch genommen und geht mit größerem FDM-Wissen einher
+# Unterstützung in FDM-Fragen wird oft in Anspruch genommen und geht mit größerem FDM-Wissen einher {#support-erhalten}
 
 ## FDM-Unterstützung wird oft in Anspruch genommen
 
-Unterstützung im FDM wird, zumindest wenn man das FDM weit fasst[^support], von sehr vielen Forschenden in Anspruch genommen (37%; weitere 8% waren sich nicht sicher).
+Unterstützung im FDM wird, zumindest wenn man das FDM weit fasst[^support], von sehr vielen Teilnehmenden in Anspruch genommen (37%; weitere 8% waren sich nicht sicher).
 
-[^support]: Die Frage nach in Anspruch genommener Unterstützung durch Expert\*innen bezog sich explizit auf Datenmanagement-Themen. Im erläuternden Hinweis wurde aber nicht eingeschränkt, aus welchem Fachbereich heraus die Expert\*innen diese Unterstützung leisteten: "Fachliche Unterstützung bezieht sich hier auf Schulungen, Fortbildungen, Beratungen o.ä. durch Expert*innen"
+[^support]: Die Frage nach in Anspruch genommener Unterstützung durch Expert\*innen bezog sich explizit auf Datenmanagement-Themen. Im erläuternden Hinweis wurde aber nicht eingeschränkt, aus welchem Fachbereich heraus die Expert\*innen diese Unterstützung leisteten: "Fachliche Unterstützung bezieht sich hier auf Schulungen, Fortbildungen, Beratungen o.ä. durch Expert*innen." Entsprechend schloss die darauf folgende Frage, die nach den konkreten Themen dieser Unterstützung fragte (siehe Abschnitt \@ref(support-datenschutz)) auch Datenschutz und Urheberrecht ein.
 
-```{r support-erhalten-1, fig.cap="Fachliche Unterstützung"}
+```{r support-erhalten-1, fig.cap="Anteil der Teilnehmenden, die fachliche Unterstützung zu Themen des FDM in Anspruch genommen haben"}
 support <- data %>%
   filter(str_detect(question_id, "^SUP1$")) %>%
   filter(!value %in% c("-998", "-999")) %>%
@@ -49,11 +49,11 @@ support %>%
   layout_mode_bar()
 ```
 
-## Unterstützung erfolgt sowohl zum Datenschutz als auch zu genuinen FDM-Themen
+## Unterstützung erfolgt sowohl zum Datenschutz als auch zu genuinen FDM-Themen {#support-datenschutz}
 
 Unterstützung erfolgte am häufigsten zum Thema Datenschutz. Ca. die Hälfte aller Teilnehmenden, die FDM-Unterstützung erhielten, bekamen diese (auch) zum Thema Datenschutz. Aber auch zu einigen genuinen FDM-Themen (Datenspeicherung- und Archivierung, Teilen von Daten, FDM allgemein) erhielten die Teilnehmenden oft Unterstützung bzw. eine Einführung (≥38% für alle drei Themen).
 
-```{r support-thema, fig.cap="Fachliche Unterstützung"}
+```{r support-thema, fig.cap="Anteil der Teilnehmenden, die zu verschiedenen FDM-Themen jeweils Unterstützung erhalten haben"}
 # Zu welchem der folgenden Themen haben Sie fachliche Unterstützung erhalten?
 
 support_thema <- data %>%
@@ -101,16 +101,16 @@ plot_ly(
 
 ```
 
-## Wer FDM-Unterstützung erhielt, kennt die FAIR-Kriterien deutlich häufiger
+## Wer FDM-Unterstützung erhielt, kennt die FAIR-Prinzipien deutlich häufiger
 
-Die FAIR-Kriterien[^fair] sind unter Teilnehmenden, die FDM-Unterstützung erhielten, deutlich bekannter (60% vs. 39%). Sie werden nach eigenen Angaben auch sehr viel häufiger umgesetzt (35% vs. 19%). Kausalität scheint hier wahrscheinlich, ggf. kann dies aber auch an den Spezifika der Teilgruppe liegen, die Unterstützung beim FDM suchte.
+Die FAIR-Prinzipien[^fair] sind unter Teilnehmenden, die FDM-Unterstützung erhielten, deutlich bekannter (60% vs. 39%). Sie werden nach eigenen Angaben auch sehr viel häufiger umgesetzt (35% vs. 19%). Mögliche Ursachen hierfür wären die FDM-Unterstützung selbst wie auch die Zusammensetzung der Teilgruppe, die Unterstützung beim FDM suchte.
 
-[^fair]: In der Umfrage wurde hierzu folgende Erläuterung gegeben: "FAIR (Findable, Accessible, Interoperable, Reusable) steht für nachhaltiges, qualitätsgesichertes Forschungsdatenmanagement. Gegenstand der FAIR Data-Prinzipien ist eine optimale Aufbereitung der Forschungsdaten, die sowohl für Menschen als auch Maschinen auffindbar, zugänglich, interoperabel und wiederverwendbar sein sollen."
+[^fair]: In der Umfrage wurde hierzu folgende Erläuterung gegeben: "FAIR (Findable, Accessible, Interoperable, Reusable) steht für nachhaltiges, qualitätsgesichertes Forschungsdatenmanagement. Gegenstand der FAIR-Prinzipien ist eine optimale Aufbereitung der Forschungsdaten, die sowohl für Menschen als auch Maschinen auffindbar, zugänglich, interoperabel und wiederverwendbar sein sollen."
 
-```{r support-erhalten-2, fig.cap="Fachliche Unterstützung und FAIR", out.height="450px"}
+```{r support-erhalten-2, fig.cap="Bekanntheit und Umsetzung der FAIR-Prinzipien in Abhängigkeit davon, ob FDM-Unterstützung in Anspruch genommen wurde", out.height="450px"}
 support <- data %>%
   filter(str_detect(question_id, "^SUP1$")) %>%
-  filter(!value %in% c("-998", "-999")) %>%
+  filter(!value %in% c("-998", "-999", "2")) %>% # 2 == Bin mir nicht sicher
   select(data_id,
     support = value_decoded
   )
@@ -151,7 +151,7 @@ sup_fair %>%
     colors = col_lik[c(5, 4, 1, 3)]
   ) %>%
   add_bars_text() %>%
-  layout_bar_flip(barmode = "stack", legend_title = "Kennen o. praktizieren Sie die FAIR-Prinzipien?") %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Kennen oder praktizieren Sie die FAIR-Prinzipien?") %>%
   layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
   layout_caption() %>%
   layout_mode_bar()  
@@ -161,7 +161,7 @@ sup_fair %>%
 
 Wer FDM-Unterstützung erhielt, gibt zudem an, dass die eigene FDM-Praxis stärker von Transparenz beeinflusst wird. Allerdings war dieser Effekt nicht sehr ausgeprägt – wer Unterstützung erhielt, gab zu 47% an, „stark durch Transparenz beeinflusst“ zu sein, wer keine erhielt, zu 40%.
 
-```{r support-erhalten-3, fig.cap="Fachliche Unterstützung und Transparenz", out.height="450px"}
+```{r support-erhalten-3, fig.cap="Einfluss von Transparenz auf die FDM-Praxis der Teilnehmenden in Abhängigkeit davon, ob FDM-Unterstützung in Anspruch genommen wurde", out.height="450px"}
 transparenz <- data %>%
   filter(str_detect(question_id, "^REG1_4$")) %>%
   filter(!value %in% c("-998", "-999", "6")) %>%
@@ -195,7 +195,7 @@ sup_transparenz %>%
     colors = col_lik[c(5, 4, 2, 1, 3)]
   ) %>%
   add_bars_text() %>%
-  layout_bar_flip(barmode = "stack", legend_title = "Wie beeinflusst Transparenz die FDM-Praxis?") %>%
+  layout_bar_flip(barmode = "stack", legend_title = "Wie beeinflusst Transparenz Ihre FDM-Praxis?") %>%
   layout_title(text = "Haben Sie bereits einmal fachliche Unterstützung\ndurch Expert*innen zu Datenmanagement-Themen in Anspruch genommen?") %>%
   layout_caption() %>%
   layout_mode_bar()

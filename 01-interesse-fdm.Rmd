@@ -46,9 +46,9 @@ plot_ly(
   type = "pie"
 ) %>%
   layout_title(text = "Umfrage-Teilnehmende nach BUA-Einrichtung") %>%
-  layout_caption(text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn} (alle BUA-Einrichtungen)",
+  layout_caption(text = ~ glue::glue("FDM-Bedarfserhebung der BUA-Einrichtungen 2021/22, n={nn}",
     nn = sum(bua_num)
-  )) %>%
+  ), hovertext = NULL) %>%
   layout_mode_bar() %>%
   layout(uniformtext = list(minsize = 11, mode = "hide"))
 ```
@@ -281,7 +281,7 @@ fig <- plot_ly(
   )
 fig %>%
   layout_mode_bar() %>%
-  layout_caption(nn = 471) %>%
+  layout_caption(bua = FALSE, nn = 471) %>%
   layout_title(text = "Beruflicher Status und Teamleitung", margin = list(l = 100, r = 100, t = 60))
 
 
@@ -293,18 +293,26 @@ fig %>%
 ```{r}
 # Calculation of number of "Freitextantworten" (free text answers)
 
-freitext <- data %>%
-  filter(str_detect(question_id, "^DSH6$|DSH7|SOL|SER|COM_1|COM_2")) %>%
-  # Filter n. gestellt, n.geantwortet und Filtersprünge
-  filter(!str_detect(value, "^-99.$")) %>%
-  select(data_id, question_id, value) %>%
-  mutate(
-    value = str_remove_all(value, "</?p>"),
-    value = str_trim(value)
-  ) %>%
-  filter(!str_detect(value, regex("^nein.?$|^no$|^-$|^kein.{0,3}$|^nichts$|^.{1,3}$", ignore_case = TRUE)))
+# freitext <- data %>%
+#   filter(str_detect(question_id, "^DSH6$|DSH7|SOL|SER|COM_1|COM_2")) %>%
+#   # Filter n. gestellt, n.geantwortet und Filtersprünge
+#   filter(!str_detect(value, "^-99.$")) %>%
+#   select(data_id, question_id, value) %>%
+#   mutate(
+#     value = str_remove_all(value, "</?p>"),
+#     value = str_trim(value)
+#   ) %>%
+#   filter(!str_detect(value, regex("^nein.?$|^no$|^-$|^kein.{0,3}$|^nichts$|^.{1,3}$", ignore_case = TRUE)))
+# 
+# nn_freitext <- freitext %>% distinct(data_id, .keep_all = TRUE) %>% pull(data_id)
 
-nn_freitext <- freitext %>% distinct(data_id, .keep_all = TRUE) %>% pull(data_id)
+freitext <- data %>%
+  filter(value == "Freitextantwort gegeben")
+
+nn_freitext <- data %>%
+  filter(value == "Freitextantwort gegeben") %>%
+  distinct(data_id) %>%
+  nrow
 ```
 
 Es wurden auf die vier reinen Freitextfragen **`r nrow(freitext)`** Antworten gegeben. Dies schließt ausschließlich inhaltliche Antworten ein, und berücksichtigt nicht die Angaben unter „Sonstiges“ bei anderen Fragen.[^interesse-fdm-3] Von 471 Teilnehmenden gaben insgesamt 239 und somit >50% Antworten auf Freitextfragen.
@@ -352,7 +360,7 @@ kontakt <- data %>%
 #   layout_mode_bar()
 ```
 
-```{r demo-kontakt, fig.cap="Anteil der Teilnehmenden, die bisher keinen Kontakt zum FDM hatten, getrennt nach beruflichem Status"}
+```{r demo-kontakt, fig.cap="Anteil der Teilnehmenden, die bisher keinen Kontakt zum FDM hatten, getrennt nach beruflichem Status."}
 kontakt <- data %>%
   filter(str_detect(question_id, "^CON_10$")) %>%
   filter(value %in% c("0", "1")) %>%
@@ -499,7 +507,7 @@ p <- plot_ly(
     )
   )) %>%
   layout_title(text = "Mir ist das Thema Forschungsdatenmanagement bisher nicht begegnet", margin = list(t = 100)) %>%
-  layout_caption(
+  layout_caption(bua = TRUE,
     hovertext = str_wrap(
       "Unter Beruflicher Status Andere sind folgende Gruppen zusammengefasst: Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward), Technische*r Mitarbeiter*in sowie Andere.",
       100

@@ -3,7 +3,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-# Das offene Teilen von Daten ist noch die Ausnahme
+# Das offene Teilen von Daten ist noch die Ausnahme {#teilen}
 
 ```{r, include=FALSE}
 source("source.R")
@@ -15,7 +15,7 @@ Fast alle Teilnehmenden (96%) teilen Daten mit Teammitgliedern. Mit Mitgliedern 
 
 Das Teilen von Daten variiert allerdings stark nach Statusgruppe. Professor\*innen teilen am häufigsten Daten — zu 82% mit externen Partnern, sowie zu 26% offen. Doktorand\*innen teilen dem gegenüber zu 33% Daten mit externen Partnern und zu 17% offen. Dies ist vermutlich (auch) darauf zurückzuführen, dass Professor\*innen i.d.R. die Kontaktpersonen für externe Partner sind, die Entscheidung über Datenfreigabe treffen und auch nach Projektende Zugriff auf Daten haben.
 
-```{r teilen-1, fig.cap="Teilen von Forschungsdaten"}
+```{r teilen-1, fig.cap="Häufigkeit, mit der Forschungsdaten mit unterschiedlichen Gruppen geteilt werden. Die Darstellung kann auf einzelne berufliche Statusgruppen begrenzt werden."}
 
 sta <- data %>%
   filter(str_detect(question_id, "^STA$")) %>%
@@ -180,14 +180,15 @@ plot_ly(
 
 ```
 
-Mit wem teilen Sie Daten (TN, die mit personenbezogenen Daten arbeiten), siehe Kapitel \@ref(teilen-forschungsdaten)
+
+Das Teilen von Daten wird zudem stark dadurch beeinflusst, ob diese personenbezogen sind. Für die entsprechende Auswertung siehe Abschnitt \@ref(teilen-forschungsdaten).
 
 ## Berlin Science Survey zeigt Open Data als verbreitete aber nicht regelhafte Praxis {#teilen-bss}
 
-Im Rahmen der Berlin Science Survey des DZHW wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, Daten zumindest "selten" offen zu teilen. Andererseits gaben nur 14% an, diese "immer" oder "sehr oft" zu tun.  Somit haben die meisten Forschenden ihre Daten schon einmal offen geteilt, aber nur eine Minderheit tut dies regelmäßig.
+Im Rahmen der Berlin Science Survey des Deutsche Zentrum für Hochschul- und Wissenschaftsforschung (DZHW) wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, Daten zumindest "selten" offen zu teilen. Andererseits gaben nur 14% an, dies "immer" oder "sehr oft" zu tun.  Somit haben die meisten Forschenden ihre Daten schon einmal offen geteilt, aber nur eine Minderheit tut dies regelmäßig.
 
 
-```{r teilen-bss, fig.cap="Berlin Science Survey"}
+```{r teilen-bss, fig.cap="Verteilung der Häufigkeit, mit der Forschungsdaten offen geteilt werden"}
 
 bss <- data.frame(
   answer = c("nie", "selten", "gelegentlich", "oft", "sehr oft", "immer", "trifft nicht zu"),
@@ -228,14 +229,14 @@ bss %>%
   layout_title(text = "Anwendung Data Sharing in eigener Forschung") %>%
   layout_caption(text = ~ glue::glue("Berlin Science Survey 2022, Subsample Charité, n={nn}",
     nn = max(nn)
-  )) %>%
+  ), hovertext = NULL) %>%
   layout_mode_bar() %>%
   layout(uniformtext = list(minsize = 11, mode = "show"))
 ```
 
 ## Text Mining zeigt Open Data als bisher seltene Praxis
 
-Für das [Charité Dashboard on Responsible Research](https://quest-dashboard.charite.de/#tabStart) wurde der Anteil an Artikeln erhoben, zu denen auch Rohdaten offen geteilt wurden. Dies erfolgte mit Text Mining, gefolgt von manueller Überprüfung.  Gemäß der hierbei angelegten [Definition von Open Data](https://zenodo.org/record/6651941) wurden in 2020 zu 7% der zugänglichen Publikationen von Forschenden der Charité offene Datensätze geteilt. Dies steht einer Selbstangabe von 21% gegenüber, Daten offen zu teilen (siehe \@ref(teilen-open-data)). Beide Angaben können jedoch zutreffend sein, wenn die meisten Forschenden nur zu einem Teil ihrer Artikel Daten teilen, wie der Berlin Science Survey zeigt (siehe \@ref(teilen-bss)).
+Für das [Charité Dashboard on Responsible Research](https://quest-dashboard.charite.de/#tabStart) wurde der Anteil an Artikeln erhoben, zu denen auch Rohdaten offen geteilt wurden.^[Einbezogen wurden nur zugängliche Artikel, die originäre Analysen von Forschungsdaten präsentierten (somit z.B. keine Reviews oder Editorials).] Dies erfolgte mit Text Mining, gefolgt von manueller Überprüfung. Gemäß der hierbei angelegten [Definition von Open Data](https://zenodo.org/record/6651941) wurden in 2020 zu 7% der zugänglichen Publikationen von Forschenden der Charité offene Datensätze geteilt. Dies steht einer Selbstangabe von 21% gegenüber, Daten offen zu teilen (siehe \@ref(teilen-open-data)). Beide Angaben können jedoch zutreffend sein, wenn die meisten Forschenden nur zu einem Teil ihrer Artikel Daten teilen, wie der Berlin Science Survey zeigt (siehe \@ref(teilen-bss)).
 
 ```{r}
 # open_data <- data.frame(
@@ -250,7 +251,7 @@ open_data <- data.frame(
   mutate(perc = value/sum(value))
 ```
 
-```{r teilen-od, fig.cap="Open Data"}
+```{r teilen-od, fig.cap="Anteil der Artikel von Forschenden der Charité aus dem Jahr 2020, zu denen Daten offen geteilt wurden"}
 open_data %>%
   plot_ly(
   labels = ~type,
@@ -272,7 +273,7 @@ open_data %>%
   ),
   type = "pie"
 ) %>%
-  layout_title(text = "Artikel von Forschenden der Charité aus 2020,\ndie das Teilen von Daten erwähnen (nur zugängliche Artikel)") %>%
+  layout_title(text = "Artikel von Forschenden der Charité aus 2020,\nzu denen Daten offen geteilt wurden") %>%
   # layout_caption(text = ~ glue::glue("Daten aus: <a href='https://quest-dashboard.charite.de/#tabStart'>Charité Dashboard on Responsible Research</a>,\nOpen Science Metriken, Any Open Data, 2020"
   # )) %>%
   layout_mode_bar() %>%

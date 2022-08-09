@@ -10,9 +10,9 @@ source("source.R")
 ```
 
 
-35% (162) der Teilnehmenden wurden in nationalen Verbundprojekten (Exzellenzcluster, Sonderforschungsbereich, Transregio, Verbundprojekt des Bundes oder DFG) gefördert. 14,3% (66)  werden durch europäische Förderstrukturen (European Research Council oder EU-Verbundprojekt) gefördert. 62,6% der Teilnehmenden sind in keine Verbundförderstrukturen eingebunden.^[Bei dieser Frage war eine Mehrfachauswahl möglich.]
+35% (162) der Teilnehmenden wurden in nationalen Verbundprojekten (Exzellenzcluster, Sonderforschungsbereich, Transregio, Verbundprojekt der DFG oder des Bundes) gefördert. 14,3% (66)  werden durch europäische Förderstrukturen (European Research Council oder EU-Verbundprojekt) gefördert. 62,6% der Teilnehmenden sind in keine Verbundförderstrukturen eingebunden.^[Bei dieser Frage war eine Mehrfachauswahl möglich. Projekte des European Research Council (ERC) wurden hier pauschal zu Verbundprojekten gezählt, auch wenn es sich überwiegend um Förderung einzelner Gruppen handelt.]
 
-```{r support, fig.cap="Förderstruktur"}
+```{r support, fig.cap="Verteilung der Umfrageteilnehmenden nach Förderung in Verbundprojekten (Frage mit Mehrfachauswahl)"}
 drittm <- data %>%
   filter(str_detect(question_id, "^ORG_[1-9]")) %>%
   filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
@@ -73,17 +73,17 @@ drittm_count %>%
     ),
     type = "pie"
   ) %>%
-  layout_title(text = "Welcher Organisationseinheit\nbzw. welcher Form von Förderstruktur gehören Sie an?", margin = list(t = 100)) %>%
-  layout_caption() %>%
+  layout_title(text = "Welcher Form von Förderstruktur gehören Sie an?", margin = list(t = 100)) %>%
+  layout_caption(bua = TRUE) %>%
   layout_mode_bar() %>%
   layout(uniformtext = list(minsize = 11, mode = "show"))
 ```
 
 ## Forschende in Verbundprojekten haben mehr Bezüge zum Thema FDM
 
-Teilnehmende, die in Verbundprojekten engagiert sind, haben in deutlich mehr Kontexten Kontakt mit dem Thema FDM gehabt, als andere. Bei Beteiligung an europäischen oder nationalen Verbundprojekten gaben 28% bzw. 27% fünf oder mehr Bezüge zum FDM an, ohne solche Förderung nur 19%. Umgekehrt war das Bild bei der Angabe, keinen oder maximal einen Bezug zum FDM zu haben. Allerdings ist dabei zu berücksichtigen, dass neben Bezügen, die auf alle zutreffen konnten (z.B. eigene Forschungspraxis, Lehrveranstaltungen, Fachcommunity) auch „Forschungsförderung“ zur Auswahl stand.
+Teilnehmende, die in Verbundprojekten engagiert sind, haben in deutlich mehr Kontexten Kontakt mit dem Thema FDM als andere. Bei Beteiligung an europäischen oder nationalen Verbundprojekten gaben 28% bzw. 27% fünf oder mehr Bezüge zum FDM an, ohne solche Förderung nur 19%. Umgekehrt war das Bild bei der Angabe, keinen oder maximal einen Bezug zum FDM zu haben. Allerdings ist dabei zu berücksichtigen, dass neben Bezügen, die auf alle zutreffen konnten (z.B. eigene Forschungspraxis, Lehrveranstaltungen, Fachcommunity) auch „Forschungsförderung“ zur Auswahl stand.
 
-```{r förderung-3, fig.cap="Förderstruktur"}
+```{r förderung-3, fig.cap="Verteilung der Anzahl von Berührungspunkten mit dem Thema FDM, aufgetrennt nach Zugehörigkeit zu Verbundförderstrukturen."}
 # Create df with distinct data_id of Förderung in order to filter other variables for only data_ids with Förderung
 drittm_distinct <- drittm %>% distinct(data_id)
 
@@ -162,7 +162,7 @@ con_drittm_all %>%
     barmode = "stack",
     autorange = "reversed"
   ) %>%
-  layout_title(text = "Anzahl Kontakte zum Thema Forschungsdatenmanagement:\nnach Organisationseinheit/Förderstruktur") %>%
+  layout_title(text = "Anzahl Kontakte zum Thema Forschungsdatenmanagement\nnach Förderstruktur") %>%
   layout(
     legend = list(orientation = "h"),
     shapes = list(
@@ -175,17 +175,17 @@ con_drittm_all %>%
       line = list(color = "black", dash = "dot")
     )
   ) %>%
-  layout_caption() %>%
+  layout_caption(bua = TRUE) %>%
   layout_mode_bar()
 ```
 
 ## Datenmanagementpläne (DMPs) werden häufiger von Forschenden in Verbundprojekten verfasst {#dmps}
 
-DMPs[^dmps] sind bei EU-Verbundprojekten schon seit Längerem Teil des Antrags. Entsprechend haben 51% der Teilnehmenden in EU-Verbundprojekten bereits mindestens einmal einen DMP erstellt. Bei nationalen Verbundprojekten liegt dieser Anteil bei 33% und somit nur geringfügig über Teilnehmenden, die nicht an Verbundprojekten beteiligt sind (31%). Allerdings ist bei nationaler Förderung angesichts der neuen DFG-Richtlinien zum FDM in Zukunft von einer deutlichen Steigerung auszugehen.
+DMPs[^dmps] sind bei EU-Verbundprojekten schon seit Längerem Teil des Antrags. Entsprechend haben 50% der Teilnehmenden in EU-Verbundprojekten bereits mindestens einmal einen DMP erstellt. Bei nationalen Verbundprojekten liegt dieser Anteil bei 33% und somit nur geringfügig über Teilnehmenden, die nicht an Verbundprojekten beteiligt sind (31%). Allerdings ist bei nationaler Förderung angesichts der neuen DFG-Richtlinien zum FDM in Zukunft von einer deutlichen Steigerung auszugehen.
 
 [^dmps]: Zum Begriff des DMPs wurde in der Umfrage erläutert: "Der Datenmanagementplan beschreibt den Umgang mit Forschungsdaten, wie z.B. Speicherung, Archivierung und Veröffentlichung."
 
-```{r förderung-1, fig.cap="Förderstruktur"}
+```{r förderung-1, fig.cap="Verteilung der Angabe, Datenmanagementpläne erstellt zu haben, aufgetrennt nach Verbundförderstruktur"}
 # DMP1
 
 dmp <- data %>%
@@ -238,10 +238,8 @@ dritt_dmp_all %>%
     type = "bar"
   ) %>%
   layout_bar_flip("stack",
-    autorange = "reversed",
-    legend_title = "Haben Sie schon einmal einen DMP erstellt?"
-  ) %>%
-  layout_title(text = "Haben Sie schon einmal einen DMP erstellt?\nnach Organisationseinheit/Förderstruktur") %>%
+    autorange = "reversed") %>%
+  layout_title(text = "Haben Sie schon einmal einen DMP erstellt?\nnach Förderstruktur") %>%
   layout_caption() %>%
   layout_mode_bar() %>%
   layout(
@@ -257,9 +255,9 @@ dritt_dmp_all %>%
   )
 ```
 
-Teilnehmende mit Teamleitung haben deutlich häufiger bereits einen DMP erstellt als Teilnehmende ohne Teamleitung.
+Teilnehmende in Teamleitungs-Rolle haben deutlich häufiger bereits einen DMP erstellt als Teilnehmende ohne solche Rolle. Dies entspricht der Verbreitung von DMPs, die derzeit v.a. im Kontext von Drittmittelanträgen erstellt werden.
 
-```{r förderung-lead, fig.cap="DMP und Teamleitung", out.height="400px"}
+```{r förderung-lead, fig.cap="Verteilung der Angabe, Datenmanagementpläne erstellt zu haben, aufgetrennt nach Teamleitungs-Rolle", out.height="400px"}
 ##
 # DMP filtered for Teamleitung
 dmp_all <- data %>%
@@ -342,7 +340,7 @@ dmp_lead_all %>%
 
 Forschende in Verbundprojekten (europäisch oder national) nehmen häufiger fachliche Unterstützung zu FDM-Themen in Anspruch (44% bzw. 43% bei Beteiligung an Verbundprojekten vs. 34% bei anderen). Offen ist, was hierfür die entscheidenden Ursachen sind: denkbar wären insbesondere die Bedeutung des FDM bei Drittmittelanträgen (siehe Abschnitt \@ref(dmps) zu DMPs), stärkerer Datenaustausch in Verbundprojekten und/oder projektinterner FDM-Support (Z-Projekte, Data Curator-Stellen).
 
-```{r förderung-2, fig.cap="Förderstruktur"}
+```{r förderung-2, fig.cap="Verteilung der Inanspruchnahme von FDM-Unterstützung, aufgetrennt nach Zugehörigkeit zu Verbundprojekten"}
 sup <- data %>%
   filter(str_detect(question_id, "^SUP1$")) %>%
   filter(!value_decoded %in% c("n. geantwortet", "n. gestellt")) %>%
@@ -394,10 +392,8 @@ dritt_sup_all %>%
   ) %>%
   layout_bar_flip(
     barmode = "stack",
-    autorange = "reversed",
-    legend_title = "Haben Sie fachliche Unterstützung zu FDM-Themen in Anspruch genommen?"
-  ) %>%
-  layout_title(text = "Haben Sie fachliche Unterstützung zu FDM-Themen in Anspruch genommen?\nnach Organisationseinheit/Förderstruktur") %>%
+    autorange = "reversed") %>%
+  layout_title(text = "Haben Sie fachliche Unterstützung zu FDM-Themen in Anspruch genommen?\nnach Förderstruktur") %>%
   layout_caption() %>%
   layout_mode_bar() %>%
   layout(

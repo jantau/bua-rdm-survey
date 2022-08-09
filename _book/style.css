@@ -31,13 +31,13 @@ pre code {
 }
 
 .summary a:hover {
-  color: #B13273 !important;
+  color: #C12075 !important;
 } 
 
 .book .book-summary ul.summary li.active>a { /*active TOC links*/
   color: #22415C !important;
   border-left: solid 4px;
-  border-color: #B13273;
+  border-color: #C12075; 
   padding-left: 11px !important;
 } 
 
@@ -80,5 +80,23 @@ h1, h2, h3, h4 {
   height: auto !important; 
 }
 
+/*--- Info box ---*/
 
+div.gotcha{
+  border: 4px #507D8C;
+  border-style: dashed solid;
+  padding: 1em;
+  margin: 1em 0;
+  padding-left: 100px;
+  padding-right: 100px;
+  background-size: 70px;
+  background-repeat: no-repeat;
+  background-position: 15px center;
+  min-height: 120px;
+  color: #507D8C;
+  background-color: #fcfcfc;
+  background-image: url("images/Exclamation_mark_2.png");
+}
+
+/*--- Cahnge color of png with https://onlinepngtools.com/change-png-color ---*/
 
