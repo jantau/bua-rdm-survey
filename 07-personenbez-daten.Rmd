@@ -3,7 +3,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-# Personenbezogene Daten werden besonders selten geteilt
+# Personenbezogene Daten werden besonders selten geteilt {#personenbezogene-daten}
 
 ```{r, include=FALSE}
 source("source.R")
@@ -59,7 +59,7 @@ source("source.R")
 
 68% der Teilnehmenden haben an, (auch) mit personenbezogenen Daten zu arbeiten. Dabei arbeiten Professor\*innen am häufigsten mit personenbezogenen Daten (82%), was wahrscheinlich die Breite ihrer Forschungsprojekte widerspiegelt. Je fokussierter die Projekte, desto geringer der Anteil derjenigen, die mit personenbezogenen Daten arbeiten – 70% unter WiMis und 61% unter Doktorand\*innen. 
 
-```{r pers-2, fig.cap="Personenbezogene Daten und beruflicher Status"}
+```{r pers-2, fig.cap="Anteil der Teilnehmenden, die mit personenbezogenen Daten arbeiten, aufgetrennt nach beruflicher Statusgruppe"}
 
 pers_sta <- data %>%
   filter(str_detect(question_id, "^STA$|^IRD$")) %>%
@@ -140,7 +140,7 @@ pers_sta %>%
 Die Arbeit mit personenbezogenen Daten spiegelt sich in den Praktiken der Teilnehmenden wider, was das Teilen von Daten angeht. Wer (auch) mit personenbezogenen Daten arbeitet, teilt diese mit allen Gruppen von (Nach)nutzenden seltener. Besonders ausgeprägt ist dieser Unterschied beim Teilen mit allen Forschenden und/oder der Öffentlichkeit. 29% der Teilnehmenden teilen Daten offen, wenn sie ausschließlich mit nicht personenbezogenen Daten arbeiten. Wer (auch) mit personenbezogenen Daten arbeitet, tut dies nur zu 17%. 
 
 
-```{r pers-3, fig.cap="Personenbezogene Daten und Teilen von Forschungsdaten"}
+```{r pers-3, fig.cap="Häufigkeit der Angabe, Daten zu teilen, dargestellt für unterschiedliche Adressat*innenkreise des Datenzugangs und jeweils aufgetrennt nach Teilnehmenden, die mit personenbezogenen Daten arbeiten und solchen, die es nicht tun."}
 
 teilen <- data %>%
   filter(str_detect(question_id, "^DSH_[1-5]|^IRD$")) %>%
@@ -257,20 +257,23 @@ ano_plot <- ano %>%
 
 # Save static plotly image
 library(reticulate)
-save_image(ano_plot, file = "ano_plot.png", height = 300, width = 400, scale = 4)
+save_image(ano_plot, file = "images/ano_plot.png", height = 300, width = 400, scale = 4)
 ```
 
 ```{r out.width= "50%", out.height="50%", out.extra='style="float:right; padding:5px"'}
-knitr::include_graphics("ano_plot.png")
+knitr::include_graphics("images/ano_plot.png")
 
 # ![](ird_plot.png)
 ```
 
-Unter den Teilnehmenden, die mit personenbezogenen Daten arbeiten, gaben 52% an, bereits mehrmals vorrangig aus Datenschutzgründen Forschungsdaten nicht geteilt zu haben. Weitere 12% gaben an, dass sie dies in einem Fall davon abgehalten habe, Forschungsdaten zu teilen. Somit sind Datenschutzgründe für fast 2/3 der Teilnehmenden (64%), die mit personenbezogenen Daten arbeiten, ein maßgebliches Hindernis beim Teilen dieser Daten.
 
-58% der Teilnehmenden gaben an, bereits mehrmals Forschungsdaten anonymisiert zu haben, bevor sie diese Dritten zugänglich gemacht haben. Lediglich 25,5% haben dagegen noch nie Forschungsdaten vor dem Teilen anonymisiert. 
+Unter den Teilnehmenden, die mit personenbezogenen Daten arbeiten, gaben 52% an, bereits mehrmals vorrangig aus Datenschutzgründen Forschungsdaten nicht geteilt zu haben. Weitere 12% gaben an, dass sie dies in einem Fall davon abgehalten habe, Forschungsdaten zu teilen. Somit sind Datenschutzgründe für fast 2/3 der Teilnehmenden (64%), die mit personenbezogenen Daten arbeiten, ein maßgebliches Hindernis beim Teilen dieser Daten (siehe unten).
 
-```{r teilen-2, fig.cap="Teilen von Forschungsdaten"}
+58% der Teilnehmenden gaben an, bereits mehrmals Forschungsdaten anonymisiert zu haben, bevor sie diese Dritten zugänglich gemacht haben. Lediglich 25,5% haben dagegen noch nie Forschungsdaten vor dem Teilen anonymisiert (siehe rechts).
+
+
+
+```{r teilen-2, fig.cap="Häufigkeit der Angaben zu der Frage, ob Forschungsdaten schon einmal vorrangig aus Datenschutzgründen nicht geteilt wurden"}
 teilen_ds <- data %>%
   filter(str_detect(question_id, "^DSH5$")) %>%
   filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "Filtersprung")) %>%
@@ -304,14 +307,14 @@ teilen_ds %>%
 ```
 
 
-
-Dies wird durch Angaben auf die Frage „Welche Gründe sprechen aus Ihrer Sicht gegen das Teilen von Forschungsdaten über Ihre gegenwärtige Data Sharing-Praxis hinaus?“ zusätzlich gestützt. Unter insgesamt 207 Antworten nannten 157 Teilnehmende einen oder mehrere spezifische Gründe, Daten nicht weiter zu teilen, als sie es bereits tun. Dabei wurde der Datenschutz mit 88 Angaben (56%) als das mit Abstand größte Hindernis benannt. Der Wunsch, die eigene Nutzung der Daten sicherzustellen und den Vorteil des Datenzugangs zu bewahren, folgte mit großem Abstand als zweithäufigstes Hindernis (32 Einträge, 20%).
+Die Antworten auf die Frage "Welche Gründe sprechen aus Ihrer Sicht gegen das Teilen von Forschungsdaten über Ihre gegenwärtige Data Sharing-Praxis hinaus?" stellen Datenschutzgründe ebenfalls als maßgebliches Hindernis für das Teilen von Daten heraus. Unter insgesamt 207 Antworten nannten 157 Teilnehmende einen oder mehrere spezifische Gründe, Daten nicht weiter zu teilen, als sie es bereits tun. Dabei wurde der Datenschutz mit 88 Angaben (56%) als das mit Abstand größte Hindernis benannt. Der Wunsch, die eigene Nutzung der Daten sicherzustellen und den Vorteil des Datenzugangs zu bewahren, folgte mit großem Abstand als zweithäufigstes Hindernis (32 Einträge, 20%).
 
 
 ```{r}
 # Wordcloud
 library(readxl)
-freitextanalyse <- read_excel("~/Documents/bua-rdm-survey-data/freitextanalyse-teilen-von-daten.xlsx")
+
+freitextanalyse <- read_excel("input/freitextanalyse-teilen-von-daten-anonym.xlsx")
 
 # Filter for valid questionnaires
 data_ids <- data %>%
@@ -329,36 +332,40 @@ fta <- freitextanalyse %>%
   count(name, nn) %>%
   mutate(perc = n/nn) %>%
  # mutate(name = paste0(name, " (", n, ")")) %>%
-  mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40)))
+  mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40))) %>%
+  mutate(name = str_wrap(name, 25))
 
 nn <- 159
 ```
 
-```{r wordcloud-hindernisse, fig.cap="Hindernisse für das Teilen von Daten"}
+```{r wordcloud-hindernisse, fig.cap="In Freitextantworten am häufigsten genannte Gründe gegen das Teilen von Daten über die aktuelle Praxis der Teilnehmenden hinaus. Die Größe des Schriftzugs repräsentiert die Häufigkeit der Erwähnung der entsprechenden Kategorie."}
 # Word Cloud
 
-set.seed(44)
+set.seed(39)
 ggplot(fta, aes(
   label = name,
   size = n,
   color = n
 )) + #, angle = angle
 #  geom_text_wordcloud_area(eccentricity = 0.9) +
-   geom_text_wordcloud() +
+  geom_text_wordcloud() +
+  #geom_text_wordcloud_area(area_corr_power = 1) +
+
   # scale_size_area(max_size = 10) +
-  scale_radius(range = c(4, 13), limits = c(0, NA)) +
+  scale_radius(range = c(4, 9), limits = c(0, NA)) +
   theme_minimal() +
   scale_color_gradient(low = col_lik[3], high = col_lik[5]) +
   labs(
-  title = "<b>Welche Gründe sprechen aus Ihrer Sicht gegen das Teilen von Forschungsdaten?
-</b>",
+  title = "Welche Gründe sprechen aus Ihrer Sicht gegen das Teilen von Forschungsdaten\nüber Ihre gegenwärtige Praxis hinaus?",
   caption = glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
                              nn = nn)) +
   theme(
-    plot.title = element_markdown(
+    plot.title = element_text(
       family = "Arial",
       size = 10.5,
-      hjust = 0.5
+      hjust = 0.5,
+      face = "bold",
+      lineheight = 1.25
     ), 
     plot.background = element_rect(fill = "#F2F2F2", linetype = 0),
     panel.border = element_blank(),

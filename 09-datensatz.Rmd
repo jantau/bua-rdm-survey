@@ -4,36 +4,35 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Daten
+# Daten {#datensatz}
 
 ```{r, include=FALSE}
 source("source.R")
 ```
 
-Hier können die ersten 1000 Zeilen der quantitativen Daten der FDM-Umfrage betrachtet und heruntergeladen werden. Die qualitativen Fragen und Antworten wurden entfernt, um keine Rückschlüsse auf einzelne Umfrageteilnehmende zuzulassen.
+Hier können die ersten 1000 Zeilen der Daten der Bedarfserhebung FDM 2021/22 betrachtet und heruntergeladen werden. Die qualitativen Antworten wurden anonymisiert, um keine Rückschlüsse auf einzelne Umfrageteilnehmende zuzulassen.
 
-Die Antworten aus der Umfrage wurden mit den Fragen und Antwortmöglichkeiten aus dem Codebook verbunden und in ein langes Format übertragen. D.h. eine Zeile entspricht einer Antwortobservation eines Fragebogens.^[Das entspricht 182 Zeilen pro Fragebogen]
+Die Antworten aus der Umfrage wurden mit den Fragen und Antwortmöglichkeiten aus dem Codebook verbunden und in ein langes Format übertragen. D.h. eine Zeile entspricht einer Antwortobservation eines Fragebogens.^[Das entspricht 221 Zeilen pro Fragebogen]
 
-Der vollständige quantitative Datensatz kann [auf dem GitHub-Repositorium des Analyseberichts](https://github.com/quest-bih/bua-rdm-survey/tree/main/output) heruntergeladen werden.
+Der vollständige (anonymisierte) Datensatz kann [auf dem GitHub-Repositorium des Analyseberichts](https://github.com/quest-bih/bua-rdm-survey/tree/main/output) heruntergeladen werden.
 \
 \
 
 ## Datensatz im langen Format {-}
 ```{r}
-data_quant <- data %>%
-  filter(question_type != "Eingabe") %>%
+data_download <- data %>%
   select(-fct_levels, value_decoded)
 
 dir.create("output", showWarnings = FALSE)
-write_csv(data_quant, "output/data_rdm_survey.csv")
+write_csv(data_download, "output/data_rdm_survey.csv")
 
-data_quant_h <- head(data_quant, 1000)
+data_download_h <- head(data_download, 1000)
 ```
 
 
 ```{r}
 library(DT)
-DT::datatable(data_quant_h, 
+DT::datatable(data_download_h, 
               rownames = FALSE,
               extensions = "Buttons",
               options = list(scrollX = TRUE,
@@ -44,8 +43,6 @@ DT::datatable(data_quant_h,
 #%>%
  # formatStyle(0, target= 'row', lineHeight = "95%")
 ```
-
-
 
 
 ```{r}

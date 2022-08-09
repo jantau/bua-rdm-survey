@@ -11,12 +11,12 @@ source("source.R")
 
 ## Es fehlen technische Werkzeuge für das FDM – besonders für Datenmanagementpläne {#technische-werkzeuge}
 
-Werkzeuge zur Erstellung von Datenmanagementplänen stechen unter den fehlenden technischen Werkzeugen für das FDM heraus. Diese fehlen 47% (221 von 466) der Teilnehmenden. Für den Datenaustausch zwischen verschiedenen Systemen fehlen zudem 39% der Teilnehmenden Werkzeuge. Aber auch andere Werkzeuge für das FDM fehlen einer größeren Gruppe von 25% bis 32% der Teilnehmenden.
+Werkzeuge zur Erstellung von Datenmanagementplänen stechen unter den fehlenden technischen Werkzeugen für das FDM heraus. Diese fehlen 47% (221 von 466) der Teilnehmenden. Für den Datenaustausch zwischen verschiedenen Systemen fehlen zudem 39% der Teilnehmenden Werkzeuge. Aber auch andere Werkzeuge für das FDM fehlen einer größeren Gruppe von 26% bis 32% der Teilnehmenden. 
 
-Seltener wurden nur Werkzeuge als fehlend benannt, die nur i.w.S. zum FDM gehören (Visualisierung, Datenanalyse, Publikation). Dies spricht dafür, dass andere Praktiken im Umgang mit digitalen Daten schon besser abgedeckt sind.
+Zu den am seltensten fehlenden Werkzeugen gehören solche, die nur i.w.S. zum FDM gehören (Projektmanagement, Visualisierung, Datenanalyse). Dies spricht dafür, dass andere Praktiken im Umgang mit digitalen Daten schon besser abgedeckt sind. Auch der Bereich "Publikation", der sehr selten genannt wurde (10%), könnte zumindest z.T. als auf die Publikation von Zeitschriften-Artikeln bezogen verstanden worden sein.
 
 
-```{r bedarfe-1, fig.cap="Technische Werkzeuge", out.height="550px"}
+```{r bedarfe-1, fig.cap="Häufigkeit, mit der für einzelne Aufgaben des FDM technische Werkzeuge fehlen (Frage mit Mehrfach-Auswahl). Diese Frage wurde BUA-weit gestellt.", out.height="550px"}
 tools <- data %>%
   filter(str_detect(question_id, "^TOOL_.($|[0-6]$)")) %>%
   filter(value != "-998") %>%
@@ -37,8 +37,7 @@ tools <- data %>%
   mutate(fct_levels = fct_reorder(fct_levels, perc, first, .desc = TRUE)) %>%
   mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein")))
 
-tools %>%
-  plot_ly(
+plot_ly(
     x = ~perc,
     y = ~fct_levels,
     color = ~value,
@@ -47,21 +46,29 @@ tools %>%
     hovertext = ~ str_glue(
       "<b>{fct_levels}—{value}</b>
     {n} ({round(perc*100, 1)}%)"
-    )
-  ) %>%
-  add_bars(
+    ),
     text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
     textposition = "inside",
     insidetextanchor = "middle",
     textangle = 0,
     textfont = list(color = "white", size = 11)
   ) %>%
-  layout_bar_flip(barmode = "stack") %>%
+  add_bars(
+    data = tools %>% filter(value == "Ja"),
+    name = "Ja",
+    marker = list(color = col_lik[5])
+  ) %>%
+  add_bars(
+    data = tools %>% filter(value == "Nein"),
+    name = "Nein",
+    marker = list(color = col_lik[1]),
+    visible = "legendonly") %>%
+  layout_bar_flip(barmode = "stack") %>% # range = c(-0.01, NA)
   layout_title(
     margin = list(t = 80),
     text = "Für welche Aufgaben des Forschungsdatenmanagements\nfehlen Ihnen geeignete technische Werkzeuge?"
   ) %>%
-  layout_caption() %>%
+  layout_caption(bua = TRUE) %>%
   layout_mode_bar()
 ```
 
@@ -71,7 +78,7 @@ Lediglich 17%[^anzahl-bedarfe] der Teilnehmenden gaben an, dass ihnen keine tech
 [^anzahl-bedarfe]: Differenz zu "Mir fehlen keine technischen Werkzeuge" resultiert aus Teilnehmenden, die keiner Antwortmöglichkeit zugestimmt haben. Sowohl Teilnehmende, die keine Antwortmöglichkeit ausgewählt haben, als auch diejenigen, die der Antwortmöglichkeit "Mir fehlen keine technischen Werkzeuge" zugestimmt haben, wurden als Teilnehmenden ohne fehlende technische Werkzeuge gezählt.
 
 
-```{r bedarfe-5, fig.cap="Technische Werkzeuge"}
+```{r bedarfe-5, fig.cap="Verteilung der Anzahl von Werkzeugkategorien im Bereich FDM, die von einzelnen Teilnehmenden als fehlend angegeben wurden"}
 tools_n <- data %>%
   filter(str_detect(question_id, "^TOOL_.($|[0-57]$)")) %>%
   filter(!value %in% c("-998", "-999")) %>%
@@ -127,9 +134,7 @@ tools_n %>%
     type = "pie"
   ) %>%
   layout_title(text = "Wieviele technische Werkzeuge fehlen den Umfrageteilnehmenden?") %>%
-  layout_caption(text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
-    nn = max(nn)
-  )) %>%
+  layout_caption(bua = TRUE) %>%
   layout_mode_bar() %>%
   layout(uniformtext = list(minsize = 11, mode = "hide"))
 ```
@@ -142,7 +147,7 @@ Diese Frage verlangte eine Einfach-Auswahl. Mit 41% (175 von 429) waren zusätzl
 Umgekehrt gaben Teilnehmende ohne Leitungsaufgabe deutlich häufiger an, dass v.a. eine höhere Sichtbarkeit von Datenpublikationen oder eine Berücksichtigung bei Berufungen sie motivieren würde. Aber auch bei Teilnehmenden ohne Leitungsaufgabe waren Personalressourcen die wichtigste Motivation.
 
 
-```{r bedarfe-2, fig.cap="Größter Anreiz"}
+```{r bedarfe-2, fig.cap="Verteilung der Angaben zu der Frage, was am meisten zu einem stärkeren Engagement im FDM motivieren würde. Dargestellt ist die Verteilung für alle Teilnehmenden, sowie eine Auftrennung nach Teamleitungs-Status."}
 
 anreize <- data %>%
   filter(str_detect(question_id, "^ICT_1$|LEAD")) %>%
@@ -219,19 +224,19 @@ anreize %>%
     autorange = "reversed",
     range = c(-0.01, 0.55),
     uniformtext = list(minsize = 8, mode = "hide"),
-    legend_title = "Leiten Sie ein Team?"
+    legend_title = "Teamleitung"
   ) %>%
   layout_title(
     margin = list(t = 80),
     text = "Was wäre für Sie der größte Anreiz,\nstärker in das Forschungsdatenmanagement zu investieren?"
   ) %>%
-  layout_caption() %>%
+  layout_caption(bua = TRUE) %>%
   layout_mode_bar()
 ```
 
 ## Hoher Bedarf an fachlicher Unterstützung zu FDM-Themen
 
-Für alle genannten Aufgaben des FDM bis auf Analyse-Codes wurde von >50% der Teilnehmenden ein (eher) hoher Bedarf geäußert (4 oder 5 auf einer Skala von 1 bis 5). Wie bei FDM-Werkzeugen, war auch bei fachlicher Unterstützung der Bedarf im Bereich Datenmanagementpläne besonders hoch (68% gaben einen (eher) hohen Bedarf an).^[Antwortmöglichkeit "kann ich nicht einschätzen" wurde entfernt.]
+Für alle genannten Aufgaben des FDM bis auf Analyse-Codes wurde von >50% der Teilnehmenden ein (eher) hoher Bedarf geäußert (4 oder 5 auf einer Skala von 1 bis 5). Wie bei FDM-Werkzeugen, war auch bei fachlicher Unterstützung der Bedarf im Bereich Datenmanagementpläne besonders hoch, hier gaben 68% der Teilnehmenden einen (eher) hohen Bedarf an.^[Antwortmöglichkeit "kann ich nicht einschätzen" wurde entfernt.]
 
 ```{r}
 support <- data %>%
@@ -273,7 +278,7 @@ support <- data %>%
 ```
 
 
-```{r unterstuetzung-2, fig.cap='Unterstützungsbedarf'}
+```{r unterstuetzung-2, fig.cap="Ausprägungsgrad des Bedarfs an fachlicher Unterstützung in verschiedenen Bereichen des FDM. Es können selektiv die gewünschten Bedarfsgrade dargestellt werden (zwischen 1 = kein Bedarf und 5 = hoher Bedarf)."}
 support <- data %>%
   filter(str_detect(question_id, "^SUP4_")) %>%
   filter(!value_decoded %in% c("n. geantwortet", "n. gestellt", "kann ich nicht einschätzen", "Filtersprung")) %>%
@@ -292,9 +297,9 @@ support <- data %>%
     n_group = sum(n)
   ) %>%
   ungroup() %>%
-  mutate(label = paste0(label, "\nM=", round(mean, 1), ", Md=", median, ", n=", n_group)) %>%
+ # mutate(label = paste0(label, "\nM=", round(mean, 1), ", Md=", median, ", n=", n_group)) %>%
   mutate(label = case_when(
-    str_detect(label, "Datenmanagementplan.*") ~ paste0("<span style='font-weight:bold; text-decoration:underline'>", label, "</span>"),
+    str_detect(label, "Datenmanagementpl.*") ~ paste0("<span style='font-weight:bold; text-decoration:underline'>", label, "</span>"),
     TRUE ~ label
   )) %>%
   mutate(label = fct_reorder(label, .x = mean, .desc = FALSE))
@@ -303,8 +308,14 @@ plot_ly(
   textposition = "inside",
   insidetextanchor = "middle",
   textangle = 0,
-  insidetextfont = list(color = "white", size = 11)
-) %>%
+  insidetextfont = list(color = "white", size = 11),
+  hovertemplate = ~ str_glue("<b>{label}</b>
+                             {value_decoded} = {round(perc*100, 1)}%
+                             n = {n}
+                             Mittelwert = {round(mean2, 1)}
+                             Median = {median}
+                             <extra></extra>"
+)) %>%
   add_bars(
     data = support %>% filter(value_decoded == "Kein Bedarf"),
     x = ~perc,
@@ -355,21 +366,22 @@ plot_ly(
   ) %>%
   layout_bar_flip(barmode = "stack") %>%
   layout_title(text = "Welchen Bedarf haben Sie an fachlicher Unterstützung\nzu folgenden Themen?") %>%
-  layout_caption(hovertext = "M=Mittelwert, Md=Median") %>%
+  layout_caption() %>%
   layout_mode_bar() %>%
-  layout(legend = list(orientation = "h")) %>%
-  add_annotations(x = 0.5,
-                  y = 1,
-                  xshift = -100,
-                  yshift = 30,
-                  xref = "paper",
-                  yref = "paper",
-                  xanchor = "center",
-                  yanchor = "auto",
-                  text = "M=Mittelwert, Md=Median (Hover für weitere Infos)",
-                  font = list(size = 10), # #F2F2F2
-                  hovertext = str_wrap("Antwortmöglichkeit “kann ich nicht einschätzen” wurde entfernt", 100),
-                  showarrow = FALSE)
+  layout(legend = list(orientation = "h")) 
+# %>%
+#   add_annotations(x = 0.5,
+#                   y = 1,
+#                   xshift = -100,
+#                   yshift = 30,
+#                   xref = "paper",
+#                   yref = "paper",
+#                   xanchor = "center",
+#                   yanchor = "auto",
+#                   text = "M=Mittelwert, Md=Median (Hover für weitere Infos)",
+#                   font = list(size = 10), # #F2F2F2
+#                   hovertext = str_wrap("Antwortmöglichkeit “kann ich nicht einschätzen” wurde entfernt", 100),
+#                   showarrow = FALSE)
 ```
 
 
@@ -378,7 +390,7 @@ plot_ly(
 
 Teilnehmende konnten an vier verschiedenen Stellen Freitextantworten zu Bedarfen im Bereich FDM geben. Darunter waren zwei reine Freitextfragen sowie zweimal Freitextangaben unter "Sonstiges". Es wurden insgesamt 169 Angaben zu Bedarfen gemacht, die eine große Breite an Diensten, Werkzeugen und Prozessen adressierten.[^bedarfe] 
 
-Dabei waren es zum Teil spezifische Bedarfe, die vorgegebene Antwortkategorien (siehe insbesondere \@ref(technische-werkzeuge)) genauer erläuterten, zum Teil aber auch in der Umfrage nicht explizit abgefragte Bedarfe. Die größte Gruppe bildeten Bedarfe nach technischen IT-Ressourcen (75 Angaben). Diese gliederten sich noch einmal in diverse Bedarfe auf, wobei der Bedarf nach Lösungen für Datenzugriff durch Externe herausragte (25 Angaben). Spezifische Software-Lösungen wurden ebenfalls oft genannt (18 Angaben), darunter aber keine Software mehr als zweimal. Auch Bedarfe ohne IT-Bezug wurden genannt, dies wurden aber in der Umfrage stärker adressiert (siehe insbesondere \@ref(mehr-personal)), so dass die Angaben in Freitexten hierzu im Vergleich weniger Aussagekraft besitzen.
+Dabei waren es zum Teil spezifische Bedarfe, die vorgegebene Antwortkategorien (siehe insbesondere \@ref(technische-werkzeuge)) genauer erläuterten, zum Teil aber auch in der Umfrage nicht explizit abgefragte Bedarfe. Die größte Gruppe bildeten Bedarfe nach technischen IT-Ressourcen (75 Angaben). Diese gliederten sich noch einmal in diverse Bedarfe auf, wobei der Bedarf nach Lösungen für Datenzugriff durch Externe herausragte (25 Angaben). Spezifische Software-Lösungen wurden ebenfalls oft genannt (18 Angaben), darunter aber keine Software mehr als zweimal. Auch Bedarfe ohne IT-Bezug wurden genannt, dies wurde aber in der Umfrage stärker adressiert (siehe insbesondere \@ref(mehr-personal)), so dass die Angaben in Freitexten hierzu im Vergleich weniger Aussagekraft besitzen.
 
 In dieser Analyse konnte ein Freitextfeld mehreren Bedarfen zugeordnet werden. Mehrere Arten von Angaben wurden aus der Analyse ausgeschlossen: (1) Angaben, dass nichts fehle oder ohne inhaltlichen Bezug zur Frage, (2) Angaben, dass vorhandene Dienste nicht bekannt seien, (3) Kommentare allgemeiner Art, die keinen konkreten Bedarf erkennen ließen und (4) Bedarfe mit explizitem BUA-Bezug. 
 
@@ -412,7 +424,7 @@ In dieser Analyse konnte ein Freitextfeld mehreren Bedarfen zugeordnet werden. M
 ```
 
 
-```{r fehlende-loesungen, fig.cap="Fehlende Lösungen"}
+```{r fehlende-loesungen, fig.cap="Verteilung, der in Freitextantworten gemachten Angaben zu fehlenden Werkzeugen, Diensten und anderen FDM-Lösungen"}
 fig <- plot_ly(
   type = "sankey",
   textfont = list(size = 13.5, color = "black"),

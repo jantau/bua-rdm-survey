@@ -1,4 +1,6 @@
 delete_merged_file: true
 language:
+  label:
+    fig: "Abb. "
   ui:
     chapter_name: ""

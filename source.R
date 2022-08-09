@@ -25,12 +25,11 @@ library(tidyverse)
 #extrafont::loadfonts()
 
 # Load data
-# Input data is stored locally for data protection reasons
-load("/Users/jan/Documents/bua-rdm-survey-data/fdm_survey_data_long_format_complete_surveys.Rdata")
+# Input data is anonymized
 
-# Input data can be saved to the repository at a later time when free text data has been checked for personal info.
-# load("input/fdm_survey_data_long_format_complete_surveys.Rdata")
-data <- fdm_survey_data_complete_surveys
+load("input/fdm_survey_data_long_format_complete_surveys_anonym.Rdata")
+data <- data_anonym
+
 
 # Color scale
 
@@ -54,6 +53,8 @@ col_2_cat <- c("#367BBA", "#A6A6A6")
 
 layout_bar_flip <- function(p,
                             barmode = "group",
+                            bargap = 0.15,
+                            bargroupgap = 0.05,
                             font = list(family = "Arial"),
                             xaxis = list(
                               title = FALSE,
@@ -83,6 +84,8 @@ layout_bar_flip <- function(p,
   layout(
     p,
     barmode = barmode,
+    bargap = bargap,
+    bargroupgap = bargroupgap,
     font = font,
     xaxis = xaxis,
     yaxis = yaxis,
@@ -91,8 +94,8 @@ layout_bar_flip <- function(p,
       font = list(size = 11),
       title = list(
         text = str_wrap(
-          string = paste0("<b>", legend_title, "</b>"),
-          width = 15
+          string = legend_title, #paste0("<b>", legend_title, "</b>"),
+          width = 20
         ),
         font = list(size = 11)
       )
@@ -199,11 +202,13 @@ layout_caption <- function(p,
                            x = 1,
                            y = 0,
                            # Best example of how to work with variable inside variable
-                           text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
+                           text = ~ glue::glue("FDM-Bedarfserhebung an der Charité 2021/22, {bua_text}n={nn}",
+                             bua_text = ifelse(bua == TRUE, "BUA-weit gestellte Frage, ", ""),
                              nn = max(nn)
                            ),
-                           hovertext = NULL,
+                           hovertext = NULL, #"Diff. zu allen gültigen Antworten (n=471): nicht gestellt, nicht beantwortet o. Antwort entfernt",
                            align = "right",
+                           bua = FALSE,
                            nn = NULL,
                            showarrow = FALSE,
                            xref = "paper",
@@ -222,6 +227,8 @@ layout_caption <- function(p,
     text = text,
     hovertext = hovertext,
     # nn = nn,
+    #BUA = BUA,
+   # bua2 = ifelse(bua2 == TRUE, "BUA-weite Frage, ", ""),
     align = align,
     showarrow = showarrow,
     xref = xref,
@@ -320,6 +327,15 @@ add_bars_text <- function(p,
            textposition = textposition,
            insidetextanchor = insidetextanchor,
            ...)
+}
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Create function to serve book ----
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+serve_book <- function() {
+  bookdown::clean_book(TRUE)
+  bookdown::render_book(new_session = TRUE)
 }
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
