@@ -333,7 +333,7 @@ add_bars_text <- function(p,
 # Create function to serve book ----
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-serve_book <- function() {
+render_book <- function() {
   bookdown::clean_book(TRUE)
   bookdown::render_book(new_session = TRUE)
 }
