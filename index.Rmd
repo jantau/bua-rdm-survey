@@ -110,7 +110,7 @@ Letzte Aktualisierung: `r format(Sys.Date(), format="%d. %B %Y")`
 
 ```
 
-![](images/logo.png)
+![](images/logo_wide.png)
 
 
 
