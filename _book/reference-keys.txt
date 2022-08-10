@@ -95,3 +95,5 @@ informieren-über-forschungsdatenmanagement
 fachliche-unterstützung
 hilfe-bei-forschungsdatenpraxis
 datensatz
+nice-label
+xyz

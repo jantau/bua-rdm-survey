@@ -20,10 +20,10 @@ data_anonym <- data %>%
                              str_detect(value_decoded, regex("^nein.?$|^no$|^-$|^kein.{0,3}$|^nichts$|^.{1,3}$", ignore_case = TRUE)) ~ "n. geantwortet",
                            TRUE ~ value_decoded)) %>%
   mutate(value = case_when(question_id %in% freitextfragen & 
-                             str_detect(value, "^-9..$", negate = TRUE) ~ "Freitextantwort gegeben",
+                             str_detect(value, "^-9..$", negate = TRUE) ~ "[Freitextantwort gegeben]",
                            TRUE ~ value),
          value_decoded = case_when(question_id %in% freitextfragen & 
-                             str_detect(value_decoded, "^n. ge.*|^DMP falsch verstanden$|^Filtersprung$", negate = TRUE) ~ "Freitextantwort gegeben",
+                             str_detect(value_decoded, "^n. ge.*|^DMP falsch verstanden$|^Filtersprung$", negate = TRUE) ~ "[Freitextantwort gegeben]",
                            TRUE ~ value_decoded))
 
 # Control results
