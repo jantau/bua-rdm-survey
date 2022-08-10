@@ -14,19 +14,28 @@ Hier können die ersten 1000 Zeilen der Daten der Bedarfserhebung FDM 2021/22 be
 
 Die Antworten aus der Umfrage wurden mit den Fragen und Antwortmöglichkeiten aus dem Codebook verbunden und in ein langes Format übertragen. D.h. eine Zeile entspricht einer Antwortobservation eines Fragebogens.^[Das entspricht 221 Zeilen pro Fragebogen]
 
-Der vollständige (anonymisierte) Datensatz kann [auf dem GitHub-Repositorium des Analyseberichts](https://github.com/quest-bih/bua-rdm-survey/tree/main/output) heruntergeladen werden.
+Der vollständige (anonymisierte) Datensatz kann im langen und weiten Format (eine Zeile entspricht einem Fragebogen) [auf dem GitHub-Repositorium des Analyseberichts](https://github.com/quest-bih/bua-rdm-survey/tree/main/output) heruntergeladen werden.
 \
 \
 
 ## Datensatz im langen Format {-}
 ```{r}
-data_download <- data %>%
+dir.create("output", showWarnings = FALSE)
+
+# Create csv of anonymized data in long format
+data_download_long <- data %>%
   select(-fct_levels, value_decoded)
 
-dir.create("output", showWarnings = FALSE)
-write_csv(data_download, "output/data_rdm_survey.csv")
+write_csv(data_download_long, "output/data_rdm_survey_long_format.csv")
 
-data_download_h <- head(data_download, 1000)
+# Create csv of anonymized data in wide format
+data_download_wide <- data %>%
+  select(data_id, question_id, value) %>%
+  pivot_wider(names_from = question_id, values_from = value)
+
+write_csv(data_download_wide, "output/data_rdm_survey_wide_format.csv")
+
+data_download_h <- head(data_download_long, 1000)
 ```
 
 

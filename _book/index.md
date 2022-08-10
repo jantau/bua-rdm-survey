@@ -1,6 +1,6 @@
 --- 
 title: "Auswertung der Bedarfserhebung zum Forschungsdatenmanagement an der Charité 2021/22"
-#date: "Letzte Aktualisierung: 2022-08-09"
+#date: "Letzte Aktualisierung: 2022-08-10"
 site: bookdown::bookdown_site
 description: |
   Ende 2021/Anfang 2022 wurde eine Umfrage an der Charité zum Thema Forschungsdatenmanagement (FDM) durchgeführt. Diese richtete sich an alle Forschenden der Charité sowie an technisches und Support-Personal. Die Umfrage wurde im Rahmen eines von der Berlin University Alliance (BUA) finanzierten Projektes durchgeführt.
@@ -25,6 +25,11 @@ bookdown::render_book()
 
 Render all book pages
 bookdown::render_book(new_session = TRUE)
+
+OR 
+
+Use own function
+render_book()
 
 Render all book pages and pdf
 bookdown::render_book(new_session = TRUE, "index.Rmd", "bookdown::pdf_book")
@@ -116,11 +121,11 @@ source("source.R")
 
 # {-}
 
-Letzte Aktualisierung: 09. August 2022
+Letzte Aktualisierung: 10. August 2022
 
 
 
-![](images/logo.png)
+![](images/logo_wide.png)
 
 
 

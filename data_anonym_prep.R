@@ -30,8 +30,6 @@ data_anonym <- data %>%
 # test %>% filter(value == "Freitextantwort gegeben") %>%
 #   distinct(data_id, .keep_all = TRUE) %>% nrow
 
-# Save anonymized data in repository
-save(data_anonym, file = "input/fdm_survey_data_long_format_complete_surveys_anonym.Rdata")
 
 # Create xlsx-file with freetext answers to review and anonymize if necessary 
 sonstiges_und_zwar_fragen <- data %>%
@@ -41,3 +39,47 @@ sonstiges_und_zwar_fragen <- data %>%
 
 library(openxlsx)
 write.xlsx(sonstiges_und_zwar_fragen, file = "/Users/jan/Documents/bua-rdm-survey-data/sonstiges-und-zwar-fragen.xlsx", keepNA = TRUE)
+
+# Read anonymized data from Sonstiges-und-zwar-Fragen
+library(readxl)
+oth <- read_excel("~/Documents/bua-rdm-survey-data/sonstiges-und-zwar-fragen-deidentifiziert.xlsx")
+
+oth_anonym <- oth %>%
+  rename(value_anonym = de_identifiziert) %>%
+  select(-question, -value)
+
+# Join data_anonym and oth
+data_anonym <- data_anonym %>% 
+  left_join(oth_anonym, by = c("data_id", "question_id")) %>%
+  mutate(value = case_when(!is.na(value_anonym) ~ value_anonym,
+                           TRUE ~ value),
+         value_decoded = case_when(!is.na(value_anonym) ~ value_anonym,
+                           TRUE ~ value_decoded)) %>%
+  select(-value_anonym)
+
+# Save anonymized data in input folder of repository
+save(data_anonym, file = "input/fdm_survey_data_long_format_complete_surveys_anonym.Rdata")
+
+
+# Test for rdm strategy chart visualization
+# x <- c(1,2,-1)
+# y <- c(-1, 1, 1.5)
+# color <- c("A", "B", "C")
+# text <- c("Adjsja agdagd gjahdgad", "Badad adad dadaa", "Cdasd asas dad")
+# size <- c(1, 2, 3)
+# weight <- c(3, 2, 1)
+# 
+# 
+# plot_ly(
+#   x = ~x,
+#   y = -y,
+#   color = ~color,
+#   shape = ~weight,
+#   text = ~text
+# ) %>%
+#   add_markers(marker = list(sizemode = 'diameter'), size = ~size, opacity = 0.5) %>%
+#   add_text(textposition = "center")
+
+
+
+
