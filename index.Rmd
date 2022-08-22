@@ -210,11 +210,4 @@ Ende 2021/Anfang 2022 wurde eine **Umfrage an der Charité zum Thema Forschungsd
   <a href="https://www.berlin-university-alliance.de"><img alt="Berlin University Alliance" style="border-width:0; width:300px;" src="images/BUA.png" /></a>
 </p>
 
-```{r include=FALSE}
-# automatically create a bib database for R packages
-knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
-), 'packages.bib')
-```
-
 

@@ -141,42 +141,6 @@ plot_ly(
   # layout_caption() %>%
   layout_mode_bar() %>%
   layout_caption()
-  
-
-
-# add_annotations(
-#     x = 0,
-#     y = 0,
-#     text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
-#       nn = nn # first(nn)
-#     ),
-#     hovertext = NULL,
-#     align = "left",
-#     showarrow = FALSE,
-#     xref = "paper",
-#     yref = "paper",
-#     xanchor = "left",
-#     yanchor = "auto",
-#     xshift = 0,
-#     yshift = -35,
-#     font = list(size = 11)
-#   )
-
-
-# Chart with dropdown menu
-# teilen %>%
-#   plot_ly(
-#     x = ~ perc,
-#     y = ~ value_decoded,
-#     marker = list(color = col_cat[1])
-#   ) %>%
-#   add_bars_text() %>%
-#   layout_bar_flip(autorange = "reversed") %>%
-#   layout_title(text = "Mit wem teilen Sie Forschungsdaten?") %>%
-#   layout_caption() %>%
-#   layout_mode_bar()
-
-
 
 ```
 

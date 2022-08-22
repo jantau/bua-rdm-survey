@@ -57,93 +57,6 @@ plot_ly(
 
 171 Teilnehmende (36,3%) gaben an, ein Team zu leiten, so dass es eine hohe Beteiligung von Führungskräften gab. Von diesen waren wiederum 55 Teilnehmende (32,3%) Professor*innen. Die größte Gruppe in der Umfrage stellten wissenschaftliche Mitarbeitende mit 270 Teilnehmenden (57,3%).
 
-```{r demo-status, fig.cap="Beruflicher Status der Teilnehmenden"}
-# Pie chart was removed in favor for sankey diagram
-
-# levels <- c("Professor*in", "Doktorand*in", "Wissenschaftliche*r Mitarbeiter*in", "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)", "Technische*r Mitarbeiter*in", "Andere")
-# 
-# labels <- levels %>%
-#   str_trunc(40) %>%
-#   str_wrap(30)
-# 
-# sta <- data %>%
-#   filter(str_detect(question_id, "^STA$")) %>%
-#   group_by(value_decoded) %>%
-#   count() %>%
-#   ungroup() %>%
-#   mutate(
-#     nn = sum(n),
-#     perc = n / sum(n)
-#   ) %>%
-#   mutate(value_decoded = factor(value_decoded,
-#     levels = levels,
-#     labels = labels
-#   )) %>%
-#   mutate(value_decoded = fct_reorder(value_decoded, perc, .desc = TRUE)) %>%
-#   arrange(-perc)
-# 
-# col <- c(col_cat, " #a675d7")
-# 
-# sta %>%
-#   plot_ly(
-#     labels = ~value_decoded,
-#     values = ~n,
-#     textposition = "inside",
-#     texttemplate = ~ str_glue("{value_decoded}
-#     {round(perc*100, 1)}% ({n})"),
-#     showlegend = FALSE,
-#     direction = "clockwise",
-#     pull = c(0, 0, 0.1, 0, 0, 0),
-#     marker = list(
-#       colors = col,
-#       line = list(col = "#FFFFFF", width = 1)
-#     ),
-#     type = "pie"
-#   ) %>%
-#   layout_title(text = "Was ist Ihr beruflicher Status?") %>%
-#   layout_caption() %>%
-#   layout_mode_bar() %>%
-#   layout(uniformtext = list(minsize = 11, mode = "hide"))
-```
-
-
-
-```{r}
-lead <- data %>%
-  filter(str_detect(question_id, "^LEAD$")) %>%
-  filter(value %in% c("0", "1")) %>%
-  mutate(value = factor(value, levels = c(0, 1), labels = c("Nein", "Ja"))) %>%
-  select(data_id, value)
-
-ird <- data %>%
-  filter(str_detect(question_id, "^IRD$")) %>%
-  filter(value %in% c("0", "1", "2")) %>%
-  mutate(value = factor(value, levels = c(0, 1, 2), labels = c("Nein", "Ja", "Ich weiß nicht"))) %>%
-  select(data_id, value)
-
-sta <- data %>%
-  filter(str_detect(question_id, "^STA$")) %>%
-  mutate(status = case_when(
-    value_decoded == "Wissenschaftliche*r Mitarbeiter*in" ~ "Wiss. Mitarbeiter*in",
-    value_decoded == "Doktorand*in" ~ "Doktorand*in",
-    value_decoded == "Professor*in" ~ "Professor*in",
-    value_decoded == "Technische*r Mitarbeiter*in" ~ "Andere",
-    value_decoded == "Wissenschaftliche*r Support-Mitarbeiter*in (z.B. Labormanager*in,  Data Steward)" ~ "Andere",
-    value_decoded == "Andere" ~ "Andere"
-  )) %>%
-  select(data_id, status)
-
-
-test <- sta %>%
-  full_join(lead, by = "data_id") %>%
-  count(status, value)
-
-test <- sta %>%
-  inner_join(ird, by = "data_id") %>%
-  count(status, value)
-
-
-```
 
 
 ```{r}
@@ -293,24 +206,11 @@ fig %>%
 ```{r}
 # Calculation of number of "Freitextantworten" (free text answers)
 
-# freitext <- data %>%
-#   filter(str_detect(question_id, "^DSH6$|DSH7|SOL|SER|COM_1|COM_2")) %>%
-#   # Filter n. gestellt, n.geantwortet und Filtersprünge
-#   filter(!str_detect(value, "^-99.$")) %>%
-#   select(data_id, question_id, value) %>%
-#   mutate(
-#     value = str_remove_all(value, "</?p>"),
-#     value = str_trim(value)
-#   ) %>%
-#   filter(!str_detect(value, regex("^nein.?$|^no$|^-$|^kein.{0,3}$|^nichts$|^.{1,3}$", ignore_case = TRUE)))
-# 
-# nn_freitext <- freitext %>% distinct(data_id, .keep_all = TRUE) %>% pull(data_id)
-
 freitext <- data %>%
-  filter(value == "Freitextantwort gegeben")
+  filter(value == "[Freitextantwort gegeben]")
 
 nn_freitext <- data %>%
-  filter(value == "Freitextantwort gegeben") %>%
+  filter(value == "[Freitextantwort gegeben]") %>%
   distinct(data_id) %>%
   nrow
 ```
@@ -338,26 +238,6 @@ kontakt <- data %>%
   mutate(value = factor(value, levels = c("1", "0"), labels = c("Ja", "Nein"))) %>%
   arrange(perc)
 
-# Chart removed in favor of chart with status group selection
-
-# kontakt %>%
-#   plot_ly(
-#   labels = ~ value,
-#   values = ~ n,
-#   sort = FALSE,
-#   textposition = "auto",
-#   texttemplate = ~str_glue("{value}
-#     {round(perc*100, 1)}% (n={n})"),
-#   showlegend = FALSE,
-#   pull = c(0.1, 0),
-#   marker = list(colors = col_lik[c(5,1)],
-#                 line = list(col = "#FFFFFF", width = 1)),
-#   type = "pie"
-# ) %>%
-#   layout(uniformtext=list(minsize=11, mode='hide')) %>%
-#   layout_title(text = "Mir ist das Thema Forschungsdatenmanagement bisher nicht begegnet!") %>%
-#   layout_caption() %>%
-#   layout_mode_bar()
 ```
 
 ```{r demo-kontakt, fig.cap="Anteil der Teilnehmenden, die bisher keinen Kontakt zum FDM hatten, getrennt nach beruflichem Status."}
@@ -378,7 +258,6 @@ sta <- data %>%
     value_decoded == "Andere" ~ "Andere"
   )) %>%
   select(data_id, status)
-
 
 sta_kon <- sta %>%
   inner_join(kontakt, by = "data_id") %>%
@@ -401,7 +280,6 @@ kon_alle <- kontakt %>%
 
 sta_kon <- bind_rows(kon_alle, sta_kon) %>%
   arrange(perc)
-
 
 p <- plot_ly(
   # sort = FALSE,

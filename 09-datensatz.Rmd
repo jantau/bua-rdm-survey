@@ -12,7 +12,7 @@ source("source.R")
 
 Hier können die ersten 1000 Zeilen der Daten der Bedarfserhebung FDM 2021/22 betrachtet und heruntergeladen werden. Die qualitativen Antworten wurden anonymisiert, um keine Rückschlüsse auf einzelne Umfrageteilnehmende zuzulassen.
 
-Die Antworten aus der Umfrage wurden mit den Fragen und Antwortmöglichkeiten aus dem Codebook verbunden und in ein langes Format übertragen. D.h. eine Zeile entspricht einer Antwortobservation eines Fragebogens.^[Das entspricht 221 Zeilen pro Fragebogen]
+Die Antworten aus der Umfrage wurden mit den Fragen und Antwortmöglichkeiten aus dem Codebook verbunden und in ein langes Format übertragen. D.h. eine Zeile entspricht einer Antwortobservation eines Fragebogens.^[Das entspricht `r data %>% filter(data_id == 1) %>% nrow()` Zeilen pro Fragebogen]
 
 Der vollständige (anonymisierte) Datensatz kann im langen und weiten Format (eine Zeile entspricht einem Fragebogen) [auf dem GitHub-Repositorium des Analyseberichts](https://github.com/quest-bih/bua-rdm-survey/tree/main/output) heruntergeladen werden.
 \
