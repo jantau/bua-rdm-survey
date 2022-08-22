@@ -16,4 +16,4 @@ To reproduce the report, download the latest version from Zenodo [![DOI](https:/
 
 ## How to create your own analyses with the survey data
 
-- Download data in wide or long format from Zenodo [![DOI](https://zenodo.org/badge/505745899.svg)](https://zenodo.org/badge/latestdoi/505745899) or from GitHub repository [a relative link](output)
+- Download data in wide or long format from Zenodo [![DOI](https://zenodo.org/badge/505745899.svg)](https://zenodo.org/badge/latestdoi/505745899) or from [GitHub repository](output)
