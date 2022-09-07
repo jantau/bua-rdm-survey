@@ -82,7 +82,6 @@ prop_df <- data.frame(
 
 set.seed(42)
 ggplot(prop_df, aes(label = format, size = n, color = col_2_cat[1])) + # ,color = type, x = type
-
   geom_text_wordcloud_area(eccentricity = 1) +
   # geom_text_wordcloud() +
   #  scale_size_area(max_size = 10) +
@@ -102,7 +101,6 @@ ggplot(prop_df, aes(label = format, size = n, color = col_2_cat[1])) + # ,color 
 ## Ansichten zum FDM sind sehr vielfältig
 
 Ein strukturiertes FDM mit einer aktiven Rolle für die Institution wird von einigen als <span style="color:#367BBA">notwendig und hilfreich</span> gesehen, von anderen als <span style="color:#9D774E">unnötige zusätzliche Arbeit</span>. Besserer <span style="color:#D873AB">Support durch IT und Datenschutz wird teilweise als Priorität gegenüber weitergehenden FDM-Aktivitäten gesehen</span>. Teilweise war die <span style="color:#E1C047">Umfrage zu technisch und entsprach nicht dem Informationsstand zum Thema FDM</span>.
-
 
 ```{r}
 # Display of quotes created with ppt 

@@ -141,42 +141,6 @@ plot_ly(
   # layout_caption() %>%
   layout_mode_bar() %>%
   layout_caption()
-  
-
-
-# add_annotations(
-#     x = 0,
-#     y = 0,
-#     text = ~ glue::glue("BUA FDM-Umfrage 2021/22, n={nn}",
-#       nn = nn # first(nn)
-#     ),
-#     hovertext = NULL,
-#     align = "left",
-#     showarrow = FALSE,
-#     xref = "paper",
-#     yref = "paper",
-#     xanchor = "left",
-#     yanchor = "auto",
-#     xshift = 0,
-#     yshift = -35,
-#     font = list(size = 11)
-#   )
-
-
-# Chart with dropdown menu
-# teilen %>%
-#   plot_ly(
-#     x = ~ perc,
-#     y = ~ value_decoded,
-#     marker = list(color = col_cat[1])
-#   ) %>%
-#   add_bars_text() %>%
-#   layout_bar_flip(autorange = "reversed") %>%
-#   layout_title(text = "Mit wem teilen Sie Forschungsdaten?") %>%
-#   layout_caption() %>%
-#   layout_mode_bar()
-
-
 
 ```
 
@@ -185,7 +149,7 @@ Das Teilen von Daten wird zudem stark dadurch beeinflusst, ob diese personenbezo
 
 ## Berlin Science Survey zeigt Open Data als verbreitete aber nicht regelhafte Praxis {#teilen-bss}
 
-Im Rahmen der Berlin Science Survey des Deutsche Zentrum für Hochschul- und Wissenschaftsforschung (DZHW) wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, Daten zumindest "selten" offen zu teilen. Andererseits gaben nur 14% an, dies "immer" oder "sehr oft" zu tun.  Somit haben die meisten Forschenden ihre Daten schon einmal offen geteilt, aber nur eine Minderheit tut dies regelmäßig.
+Im Rahmen des BUA-finanzierten [Berlin Science Survey](https://www.berlinsciencesurvey.de/de), der am [Robert K. Merton Zentrum (RMZ)](https://www.rmz.hu-berlin.de/de) durchgeführt wird, wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, Daten zumindest "selten" offen zu teilen. Andererseits gaben nur 14% an, dies "immer" oder "sehr oft" zu tun.  Somit haben die meisten Forschenden ihre Daten schon einmal offen geteilt, aber nur eine Minderheit tut dies regelmäßig.
 
 
 ```{r teilen-bss, fig.cap="Verteilung der Häufigkeit, mit der Forschungsdaten offen geteilt werden"}

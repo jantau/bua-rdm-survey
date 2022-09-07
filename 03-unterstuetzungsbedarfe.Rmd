@@ -257,27 +257,6 @@ support <- data %>%
 ```
 
 
-```{r unterstuetzung-1, fig.cap='Unterstützungsbedarf'}
-
-# support %>% plot_ly(x = ~ perc,
-#                  y = ~ label,
-#                  color = ~ value_decoded) %>%
-#   add_bars(
-#     colors = col_lik,
-#     text = ~ paste0(round(perc * 100, 0), "%"),
-#     textposition = 'inside',
-#     insidetextanchor = "middle",
-#     textangle = 0,
-#     insidetextfont = list(color = "white") #, size = 14
-#   ) %>%
-#   layout_bar_flip(barmode = "stack") %>%
-#   layout_title(text = "Welchen Bedarf haben Sie an fachlicher Unterstützung\nzu folgenden Themen?") %>%
-#   layout(legend = list(orientation = 'h')) %>%
-#   layout_caption() %>%
-#   layout_mode_bar()
-```
-
-
 ```{r unterstuetzung-2, fig.cap="Ausprägungsgrad des Bedarfs an fachlicher Unterstützung in verschiedenen Bereichen des FDM. Es können selektiv die gewünschten Bedarfsgrade dargestellt werden (zwischen 1 = kein Bedarf und 5 = hoher Bedarf)."}
 support <- data %>%
   filter(str_detect(question_id, "^SUP4_")) %>%
@@ -386,6 +365,7 @@ plot_ly(
 
 
 
+
 ## Für FDM insgesamt und insbesondere IT-Aspekte des FDM werden viele konkrete Bedarfe geäußert
 
 Teilnehmende konnten an vier verschiedenen Stellen Freitextantworten zu Bedarfen im Bereich FDM geben. Darunter waren zwei reine Freitextfragen sowie zweimal Freitextangaben unter "Sonstiges". Es wurden insgesamt 169 Angaben zu Bedarfen gemacht, die eine große Breite an Diensten, Werkzeugen und Prozessen adressierten.[^bedarfe] 
@@ -490,6 +470,4 @@ fig %>% layout_mode_bar() %>%
   layout_caption(nn = 169) %>%
   layout_title(text = "Kategorisierte Freitextantworten zu\ngewünschten Diensten, Werkzeugen und Lösungen", margin = list(l = 40, r = 40, t = 60))
 
-#seq(0, 1, length.out = 11)
-#seq(0, 0.6, length.out = 8), seq(0.7, 1, length.out = 3)
 ```

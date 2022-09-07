@@ -815,26 +815,6 @@ del <- data %>%
   mutate(value = factor(value, levels = c("0", "1", "2", "3", "4"), labels = c("ja, nach < 10 Jahren", "ja, nach 10 Jahren", "ja, nach > 10 Jahren", "keine Löschung geplant", "weiß nicht"))) %>%
   arrange(value)
 
-# del %>%
-#   plot_ly(
-#     x = ~perc,
-#     y = ~value,
-#    # color = ~value_decoded,
-#     colors = col_cat[1],
-#     text = ~ paste0(round(perc * 100, 0), "% (", n, ")"),
-#     textposition = "inside",
-#     insidetextanchor = "middle",
-#     textangle = 0,
-#     textfont = list(color = "white", size = 11),
-#     type = "bar") %>%
-#   layout_bar_flip(
-#     barmode = "stack",
-#     autorange = "reversed"
-#   ) %>%
-#   layout_title(text = "Werden Sie oder andere Ihre Forschungsdaten\nin der Zukunft löschen?") %>%
-#   layout_caption() %>%
-#   layout_mode_bar()
-
 del %>%
   plot_ly(
   labels = ~value,
