@@ -365,6 +365,7 @@ plot_ly(
 
 
 
+
 ## Für FDM insgesamt und insbesondere IT-Aspekte des FDM werden viele konkrete Bedarfe geäußert
 
 Teilnehmende konnten an vier verschiedenen Stellen Freitextantworten zu Bedarfen im Bereich FDM geben. Darunter waren zwei reine Freitextfragen sowie zweimal Freitextangaben unter "Sonstiges". Es wurden insgesamt 169 Angaben zu Bedarfen gemacht, die eine große Breite an Diensten, Werkzeugen und Prozessen adressierten.[^bedarfe] 

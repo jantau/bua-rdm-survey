@@ -70,7 +70,10 @@ source("source.R")
 
 # {-}
 
+[![DOI](https://zenodo.org/badge/505745899.svg)](https://zenodo.org/badge/latestdoi/505745899) 
+
 Letzte Aktualisierung: `r format(Sys.Date(), format="%d. %B %Y")`
+
 
 ```{r}
 # Template for start page illustration
@@ -192,8 +195,6 @@ Ende 2021/Anfang 2022 wurde eine **Umfrage an der Charité zum Thema Forschungsd
 
 \
 \
-
-
 
 
 

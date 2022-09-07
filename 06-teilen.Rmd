@@ -149,7 +149,7 @@ Das Teilen von Daten wird zudem stark dadurch beeinflusst, ob diese personenbezo
 
 ## Berlin Science Survey zeigt Open Data als verbreitete aber nicht regelhafte Praxis {#teilen-bss}
 
-Im Rahmen der Berlin Science Survey des Deutsche Zentrum für Hochschul- und Wissenschaftsforschung (DZHW) wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, Daten zumindest "selten" offen zu teilen. Andererseits gaben nur 14% an, dies "immer" oder "sehr oft" zu tun.  Somit haben die meisten Forschenden ihre Daten schon einmal offen geteilt, aber nur eine Minderheit tut dies regelmäßig.
+Im Rahmen des BUA-finanzierten [Berlin Science Survey](https://www.berlinsciencesurvey.de/de), der am [Robert K. Merton Zentrum (RMZ)](https://www.rmz.hu-berlin.de/de) durchgeführt wird, wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, Daten zumindest "selten" offen zu teilen. Andererseits gaben nur 14% an, dies "immer" oder "sehr oft" zu tun.  Somit haben die meisten Forschenden ihre Daten schon einmal offen geteilt, aber nur eine Minderheit tut dies regelmäßig.
 
 
 ```{r teilen-bss, fig.cap="Verteilung der Häufigkeit, mit der Forschungsdaten offen geteilt werden"}
