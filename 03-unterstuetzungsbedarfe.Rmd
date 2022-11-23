@@ -16,7 +16,7 @@ Werkzeuge zur Erstellung von Datenmanagementplänen stechen unter den fehlenden 
 Zu den am seltensten fehlenden Werkzeugen gehören solche, die nur i.w.S. zum FDM gehören (Projektmanagement, Visualisierung, Datenanalyse). Dies spricht dafür, dass andere Praktiken im Umgang mit digitalen Daten schon besser abgedeckt sind. Auch der Bereich "Publikation", der sehr selten genannt wurde (10%), könnte zumindest z.T. als auf die Publikation von Zeitschriften-Artikeln bezogen verstanden worden sein.
 
 
-```{r bedarfe-1, fig.cap="Häufigkeit, mit der für einzelne Aufgaben des FDM technische Werkzeuge fehlen (Frage mit Mehrfach-Auswahl). Diese Frage wurde BUA-weit gestellt.", out.height="550px"}
+```{r bedarfe-1, fig.cap="Häufigkeit, mit der für einzelne Aufgaben des FDM technische Werkzeuge fehlen (Frage mit Mehrfach-Auswahl)", out.height="550px"}
 tools <- data %>%
   filter(str_detect(question_id, "^TOOL_.($|[0-6]$)")) %>%
   filter(value != "-998") %>%

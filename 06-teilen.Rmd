@@ -3,13 +3,17 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-# Das offene Teilen von Daten ist noch die Ausnahme {#teilen}
+# Data Sharing ist noch die Ausnahme {#teilen}
 
 ```{r, include=FALSE}
 source("source.R")
 ```
 
-## Fast alle teilen Daten, aber eine Minderheit teilt sie als 'Open Data' {#teilen-open-data}
+## Fast alle teilen Daten, aber nur eine Minderheit teilt sie öffentlich {#teilen-open-data}
+
+:::gotcha
+Unter Data Sharing wird hier ein Zugang zu Daten verstanden, der entweder gänzlich offen ist ('Open Data') oder bei dem die Daten auffindbar sind und unter definierten Zugangsauflagen für andere Forschungsprojekte freigegeben werden. Im Kontext des [Charité Dashboard on Responsible Research](https://quest-dashboard.charite.de/#tabStart) und der [Open Data-LOM](https://zenodo.org/record/6651941) wird 'Open Data' als Oberbegriff und somit synonym mit 'Data Sharing' verwendet.
+:::
 
 Fast alle Teilnehmenden (96%) teilen Daten mit Teammitgliedern. Mit Mitgliedern der Charité und externen Partnern teilt jeweils etwas mehr als die Hälfte. Dagegen teilen nur 21% der Beteiligten ihre Daten mit allen Forschenden oder der Öffentlichkeit. 
 
@@ -147,9 +151,9 @@ plot_ly(
 
 Das Teilen von Daten wird zudem stark dadurch beeinflusst, ob diese personenbezogen sind. Für die entsprechende Auswertung siehe Abschnitt \@ref(teilen-forschungsdaten).
 
-## Berlin Science Survey zeigt Open Data als verbreitete aber nicht regelhafte Praxis {#teilen-bss}
+## Berlin Science Survey zeigt Data Sharing als verbreitete aber nicht regelhafte Praxis {#teilen-bss}
 
-Im Rahmen des BUA-finanzierten [Berlin Science Survey](https://www.berlinsciencesurvey.de/de), der am [Robert K. Merton Zentrum (RMZ)](https://www.rmz.hu-berlin.de/de) durchgeführt wird, wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, Daten zumindest "selten" offen zu teilen. Andererseits gaben nur 14% an, dies "immer" oder "sehr oft" zu tun.  Somit haben die meisten Forschenden ihre Daten schon einmal offen geteilt, aber nur eine Minderheit tut dies regelmäßig.
+Im Rahmen des BUA-finanzierten [Berlin Science Survey](https://www.berlinsciencesurvey.de/de), der am [Robert K. Merton Zentrum (RMZ)](https://www.rmz.hu-berlin.de/de) durchgeführt wird, wurde **ein anderes Sample von 227 Forschenden** der Charité befragt. Unter diesen Forschenden gaben 67% an, data sharing zumindest "selten" umzusetzen. Andererseits gaben nur 14% an, dies "immer" oder "sehr oft" zu tun. Somit haben die meisten Forschenden ihre Daten schon einmal offen oder unter definierten Zugangsauflagen geteilt, aber nur eine Minderheit tut dies regelmäßig.
 
 
 ```{r teilen-bss, fig.cap="Verteilung der Häufigkeit, mit der Forschungsdaten offen geteilt werden"}
@@ -171,6 +175,8 @@ bss <-
   ) %>%
   mutate(answer = factor(answer, levels = c("nie", "selten", "gelegentlich", "oft", "sehr oft", "immer", "trifft nicht zu")))
 
+col_bss <- c("#F2CB54", "#F5D777", "#F7E5A2", "#A7D9E0", "#80C8D2", "#5EB5C3", "#B4B7BA")
+
 bss %>%
   plot_ly(
     labels = ~answer,
@@ -185,7 +191,7 @@ bss %>%
     direction = "clockwise",
     #  pull = c(0, 0, 0, 0, 0, 0.1),
     marker = list(
-      colors = c(col_lik_6, col_lik[3]),
+      colors = col_bss,
       line = list(col = "#FFFFFF", width = 1)
     ),
     type = "pie"
@@ -198,9 +204,9 @@ bss %>%
   layout(uniformtext = list(minsize = 11, mode = "show"))
 ```
 
-## Text Mining zeigt Open Data als bisher seltene Praxis
+## Text Mining zeigt Data Sharing als bisher seltene Praxis
 
-Für das [Charité Dashboard on Responsible Research](https://quest-dashboard.charite.de/#tabStart) wurde der Anteil an Artikeln erhoben, zu denen auch Rohdaten offen geteilt wurden.^[Einbezogen wurden nur zugängliche Artikel, die originäre Analysen von Forschungsdaten präsentierten (somit z.B. keine Reviews oder Editorials).] Dies erfolgte mit Text Mining, gefolgt von manueller Überprüfung. Gemäß der hierbei angelegten [Definition von Open Data](https://zenodo.org/record/6651941) wurden in 2020 zu 7% der zugänglichen Publikationen von Forschenden der Charité offene Datensätze geteilt. Dies steht einer Selbstangabe von 21% gegenüber, Daten offen zu teilen (siehe \@ref(teilen-open-data)). Beide Angaben können jedoch zutreffend sein, wenn die meisten Forschenden nur zu einem Teil ihrer Artikel Daten teilen, wie der Berlin Science Survey zeigt (siehe \@ref(teilen-bss)).
+Für das [Charité Dashboard on Responsible Research](https://quest-dashboard.charite.de/#tabStart) wurde der Anteil an Artikeln erhoben, zu denen auch Rohdaten geteilt wurden.^[Einbezogen wurden nur zugängliche Artikel, die originäre Analysen von Forschungsdaten präsentierten (somit z.B. keine Reviews oder Editorials).] Dies erfolgte mit Text Mining, gefolgt von manueller Überprüfung. Gemäß der hierbei angelegten **[Definition von Open Data](https://zenodo.org/record/6651941), die zugangsbeschränkte Daten einschloss, ** wurden in 2020 zu 7% der zugänglichen Publikationen von Forschenden der Charité Datensätze geteilt. Dies steht einer Selbstangabe von 21% gegenüber, data sharing umzusetzen (siehe \@ref(teilen-open-data)). Beide Angaben können jedoch zutreffend sein, wenn die meisten Forschenden nur zu einem Teil ihrer Artikel Daten teilen, wie der Berlin Science Survey zeigt (siehe \@ref(teilen-bss)).
 
 ```{r}
 # open_data <- data.frame(
@@ -215,7 +221,7 @@ open_data <- data.frame(
   mutate(perc = value/sum(value))
 ```
 
-```{r teilen-od, fig.cap="Anteil der Artikel von Forschenden der Charité aus dem Jahr 2020, zu denen Daten offen geteilt wurden"}
+```{r teilen-od, fig.cap="Anteil der Artikel von Forschenden der Charité aus dem Jahr 2020, zu denen Daten geteilt wurden"}
 open_data %>%
   plot_ly(
   labels = ~type,
@@ -225,6 +231,10 @@ open_data %>%
                             {round(perc*100, 1)}%
                            ({value})"),
   insidetextorientation = "horizontal",
+  hovertemplate = ~ str_glue("{type}
+                            {round(perc*100, 1)}%
+                           ({value})
+                           <extra></extra>"),
   automargin = TRUE,
   showlegend = FALSE,
   sort = TRUE,
@@ -237,7 +247,7 @@ open_data %>%
   ),
   type = "pie"
 ) %>%
-  layout_title(text = "Artikel von Forschenden der Charité aus 2020,\nzu denen Daten offen geteilt wurden") %>%
+  layout_title(text = "Artikel von Forschenden der Charité aus 2020,\nzu denen Daten geteilt wurden") %>%
   # layout_caption(text = ~ glue::glue("Daten aus: <a href='https://quest-dashboard.charite.de/#tabStart'>Charité Dashboard on Responsible Research</a>,\nOpen Science Metriken, Any Open Data, 2020"
   # )) %>%
   layout_mode_bar() %>%
@@ -258,4 +268,5 @@ open_data %>%
     font = list(size = 11)
   ) 
 ```
+
 

@@ -54,7 +54,7 @@ support %>%
 Unterstützung erfolgte am häufigsten zum Thema Datenschutz. Ca. die Hälfte aller Teilnehmenden, die FDM-Unterstützung erhielten, bekamen diese (auch) zum Thema Datenschutz. Aber auch zu einigen genuinen FDM-Themen (Datenspeicherung- und Archivierung, Teilen von Daten, FDM allgemein) erhielten die Teilnehmenden oft Unterstützung bzw. eine Einführung (≥38% für alle drei Themen).
 
 ```{r support-thema, fig.cap="Anteil der Teilnehmenden, die zu verschiedenen FDM-Themen jeweils Unterstützung erhalten haben"}
-# Zu welchem der folgenden Themen haben Sie fachliche Unterstützung erhalten?
+# Zu welchen der folgenden Themen haben Sie fachliche Unterstützung erhalten?
 
 support_thema <- data %>%
   filter(str_detect(question_id, "^SUP2_([1-9]$|10)")) %>%
@@ -94,7 +94,7 @@ plot_ly(
   layout_bar_flip(barmode = "stack", autorange = "reversed") %>%
   layout_title(
     margin = list(t = 80, b = 50),
-    text = "Zu welchem der folgenden Themen\nhaben Sie fachliche Unterstützung erhalten?"
+    text = "Zu welchen der folgenden Themen\nhaben Sie fachliche Unterstützung erhalten?"
   ) %>%
   layout_caption() %>%
   layout_mode_bar() 
