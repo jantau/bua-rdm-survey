@@ -16,7 +16,7 @@ source("source.R")
 9 von 10 abgefragten Datentypen sind für jeweils >20% der Teilnehmenden relevant (Mehrfachauswahl-Frage). Es ist zu erwarten, dass dies teilweise auch mit gänzlich verschiedenem Umgang mit Daten einhergeht. So arbeitet knapp die Hälfte der Teilnehmenden mit Datenbanken (51%), ein Viertel (24%) mit selbst entwickelter oder angepasster Software.
 
 
-```{r praktiken-1, fig.cap="Häufigkeit der Generierung bzw. Nutzung verschiedener Typen von Forschungsdaten. Diese Frage wurde BUA-weit gestellt."}
+```{r praktiken-1, fig.cap="Häufigkeit der Generierung bzw. Nutzung verschiedener Typen von Forschungsdaten"}
 formate <- data %>%
   filter(str_detect(question_id, "^DATA_([1-9]|10)$")) %>%
   select(data_id, fct_levels, value) %>%
@@ -60,7 +60,7 @@ plot_ly(
   ) %>%
   layout_bar_flip(barmode = "stack") %>%
   layout_title(text = "Welche Forschungsdatentypen und -formate generieren Sie\nbzw. sind Gegenstand Ihrer Forschung?") %>%
-  layout_caption() %>%
+  layout_caption(bua = TRUE) %>%
   layout_mode_bar()
 ```
 
@@ -389,3 +389,6 @@ plot_ly(
   layout_mode_bar() %>%
   layout_caption(bua = FALSE)
 ```
+
+
+

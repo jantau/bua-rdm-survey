@@ -67,7 +67,6 @@ Add a numbered part:
 source("source.R")
 ```
 
-
 # {-}
 
 [![DOI](https://zenodo.org/badge/505745899.svg)](https://zenodo.org/badge/latestdoi/505745899) 
@@ -210,5 +209,3 @@ Ende 2021/Anfang 2022 wurde eine **Umfrage an der Charité zum Thema Forschungsd
 <p align ="center">
   <a href="https://www.berlin-university-alliance.de"><img alt="Berlin University Alliance" style="border-width:0; width:300px;" src="images/BUA.png" /></a>
 </p>
-
-

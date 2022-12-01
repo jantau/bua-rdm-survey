@@ -339,5 +339,43 @@ render_book <- function() {
 }
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# How many questions were asked to the survey participants ----
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Filtersprung
+# c("-998", "-997", "-996", "-995", "-994", "-993", "-992", "-991", "-990", "-989", "-988")
+
+# number_questions <- data |>
+#   # head(n = 221) |>
+#   # filter(data_id == 581) |>
+#   filter(!value %in% c("-998")) |>
+#   mutate(question_id_sep = str_remove(question_id, "_.*")) |>
+#   select(data_id, question_id, question_id_sep, question, question_type, value) |>
+#   drop_na(question) |>
+#   group_by(data_id) |>
+#   distinct(question_id_sep, .keep_all = TRUE) |>
+#   ungroup() |>
+#   count(data_id)
+# 
+# summary(number_questions$n)
+# 
+# Mode <- function(x) {
+#   ux <- unique(x)
+#   ux[which.max(tabulate(match(x, ux)))]
+# }
+# 
+# Mode(number_questions$n)
+# 
+# hist(number_questions$n, breaks = 46)
+
+# Controll results
+# controll <- data |>
+#   filter(value == "-998") |>
+#   count(data_id)
+# 
+# summary(controll$n)
+# hist(controll$n, breaks = 177)
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # End ----
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -72,7 +72,7 @@ forschende-in-verbundprojekten-nehmen-häufiger-unterstützung-zu-fdm-in-anspruc
 teilen
 teilen-open-data
 teilen-bss
-text-mining-zeigt-open-data-als-bisher-seltene-praxis
+text-mining-zeigt-data-sharing-als-bisher-seltene-praxis
 personenbezogene-daten
 eine-mehrheit-arbeitet-auch-mit-personenbezogenen-daten
 teilen-forschungsdaten
@@ -94,4 +94,3 @@ forschungsdaten-offen-teilen
 informieren-über-forschungsdatenmanagement
 fachliche-unterstützung
 hilfe-bei-forschungsdatenpraxis
-datensatz
