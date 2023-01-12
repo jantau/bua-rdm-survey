@@ -303,7 +303,7 @@ fig <- plot_ly(
       "Alle\nTeilnehmenden", #0
       "DMP erstellt\n(32%)", #1
       "DMP NICHT erstellt\n(61%)", #2
-      "Unischer, ob DMP erstellt\n(7%)", #3
+      "Unsicher, ob DMP erstellt\n(7%)", #3
       "Hilfsmittel (z.B. Vorlagen, Muster)\nverwendet (20%)", #4
       "Hilfsmittel (z.B. Vorlagen, Muster)\nNICHT verwendet (12%)", #5
       "DMP von Kolleg*innen\nals Vorlage", #6
